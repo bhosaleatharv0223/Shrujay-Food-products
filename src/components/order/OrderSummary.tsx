@@ -13,8 +13,8 @@ type Props = {
 
 export function OrderSummary({ items, subtotal, deliveryCharges, discount, grandTotal }: Props) {
   return (
-    <div className="space-y-4 rounded-[28px] border border-[#E4D2B4] bg-[#FFFDF8] p-5 shadow-sm">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 rounded-[24px] border border-[#E4D2B4] bg-[#FFFDF8] p-4 shadow-sm sm:rounded-[28px] sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-lg font-semibold text-[#6B4226]">Order Summary</h3>
         <span className="rounded-full bg-[#F6E9D8] px-3 py-1 text-xs font-semibold text-[#8B5E3C]">Premium Checkout</span>
       </div>
@@ -22,8 +22,8 @@ export function OrderSummary({ items, subtotal, deliveryCharges, discount, grand
       <div className="space-y-3">
         {items.map(item => (
           <div key={item.id} className="flex items-center gap-3 rounded-2xl border border-[#F2E2C8] bg-white p-3">
-            <img src={item.image} alt={item.name} className="h-16 w-16 rounded-xl object-cover" />
-            <div className="flex-1">
+            <img src={item.image} alt={item.name} className="h-14 w-14 flex-shrink-0 rounded-xl object-cover sm:h-16 sm:w-16" />
+            <div className="min-w-0 flex-1">
               <p className="font-semibold text-[#2C1810]">{item.name}</p>
               <p className="text-sm text-[#6D4C41]">{item.quantity} kg</p>
             </div>

@@ -185,7 +185,7 @@ export function LocationPicker({ value, onChange }: Props) {
       </button>
 
       <div className="overflow-hidden rounded-[24px] border border-[#E4D2B4] bg-[#FFFDF8] p-3">
-        <MapContainer center={position} zoom={13} scrollWheelZoom className="h-[320px] w-full rounded-[20px]">
+        <MapContainer center={position} zoom={13} scrollWheelZoom className="h-[240px] w-full rounded-[20px] sm:h-[320px]">
           <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapController position={position} zoom={13} />
           <MapEvents onSelect={(latitude, longitude) => { void applyLocation(latitude, longitude, 'Selected location'); }} />

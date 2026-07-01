@@ -34,6 +34,7 @@ type CartItem = { product: Product; quantity: number };
 const PHONE = "8080394411";
 const PHONE_DISPLAY = "+91 8080394411";
 const INSTAGRAM_HANDLE = "@shrujay_food_products";
+const BUSINESS_MAP_URL = "https://www.google.com/maps?q=18.4956,73.9668";
 const HERO_IMAGES = ["/1000322244.jpg", "/hero-bg-1.png", "/hero-bg-2.png", "/hero-bg-3.png"];
 
 // ─── Logo image ────────────────────────────────────────────────────────────
@@ -92,9 +93,13 @@ function Nav({ page, setPage, cartCount, openCart }: { page: Page; setPage: (p: 
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
         {/* ── Desktop: 3-column grid with logo centred ── */}
-        <div className="hidden md:grid grid-cols-3 items-center h-[80px]">
+        <div className="hidden lg:flex items-center h-[80px]">
 
           {/* Left — nav links */}
+          <button onClick={() => go("home")} className="group mr-8 flex-shrink-0" aria-label="Go to home page">
+            <Logo size={76} />
+          </button>
+
           <div className="flex items-center gap-6">
             {links.map(l => (
               <button
@@ -110,24 +115,20 @@ function Nav({ page, setPage, cartCount, openCart }: { page: Page; setPage: (p: 
             ))}
           </div>
 
-          {/* Centre — logo */}
-          <div className="flex justify-center">
-            <button onClick={() => go("home")} className="group">
-              <Logo size={76} />
-            </button>
-          </div>
-
-          {/* Right — phone + CTA */}
-          <div className="flex items-center justify-end gap-4">
+          {/* Right — location + CTA */}
+          <div className="ml-auto flex items-center justify-end gap-4">
             <a
-              href={`tel:${PHONE}`}
+              href={BUSINESS_MAP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-[13px] text-[#6D4C41] font-semibold hover:text-[#DB9C23] transition-colors"
+              aria-label="Open Shrujay Food Products location in Google Maps"
             >
-              <Phone size={13} className="text-[#DB9C23]" />
-              {PHONE_DISPLAY}
+              <MapPin size={13} className="text-[#DB9C23]" />
+              Our Location
             </a>
             <button
-              onClick={() => go("contact")}
+              onClick={() => go("products")}
               className="px-5 py-2.5 bg-[#DB9C23] text-white text-[13px] font-bold rounded-full hover:bg-[#D4A017] transition-all duration-200 shadow-sm"
             >
               Order Now
@@ -148,7 +149,7 @@ function Nav({ page, setPage, cartCount, openCart }: { page: Page; setPage: (p: 
         </div>
 
         {/* ── Mobile header ── */}
-        <div className="md:hidden flex items-center justify-between h-[64px]">
+        <div className="lg:hidden flex items-center justify-between h-[64px]">
           <button onClick={() => go("home")} className="flex items-center gap-2">
             <Logo size={52} />
           </button>
@@ -169,7 +170,7 @@ function Nav({ page, setPage, cartCount, openCart }: { page: Page; setPage: (p: 
 
         {/* Mobile drawer */}
         {open && (
-          <div className="md:hidden bg-white border-t border-[#DB9C23]/10 py-4">
+          <div className="lg:hidden max-h-[calc(100vh-64px)] overflow-y-auto bg-white border-t border-[#DB9C23]/10 py-4">
             {links.map(l => (
               <button
                 key={l.p}
@@ -180,10 +181,16 @@ function Nav({ page, setPage, cartCount, openCart }: { page: Page; setPage: (p: 
               </button>
             ))}
             <div className="px-5 pt-3 flex items-center gap-4 flex-wrap border-t border-[#DB9C23]/10 mt-2">
-              <a href={`tel:${PHONE}`} className="flex items-center gap-1.5 text-[13px] text-[#6D4C41]">
-                <Phone size={13} className="text-[#DB9C23]" /> {PHONE_DISPLAY}
+              <a
+                href={BUSINESS_MAP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-[13px] text-[#6D4C41]"
+                aria-label="Open Shrujay Food Products location in Google Maps"
+              >
+                <MapPin size={13} className="text-[#DB9C23]" /> Our Location
               </a>
-              <button onClick={() => go("contact")} className="px-5 py-2 bg-[#DB9C23] text-white text-[13px] font-bold rounded-full">
+              <button onClick={() => go("products")} className="px-5 py-2 bg-[#DB9C23] text-white text-[13px] font-bold rounded-full">
                 Order Now
               </button>
             </div>
@@ -205,8 +212,8 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
   ];
   return (
     <footer className="bg-[#174C2C] text-white border-t-4 border-[#DB9C23]">
-      <div className="max-w-7xl mx-auto px-6 py-14">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-5">
@@ -322,7 +329,7 @@ function ProductCard({ product, setPage, addToCart }: { product: Product; setPag
   const go = () => { setPage("product-detail"); window.scrollTo({ top: 0, behavior: "smooth" }); };
   return (
     <div className="bg-white rounded-[14px] overflow-hidden border border-[#DB9C23]/10 shadow-sm hover:shadow-[0_8px_32px_rgba(46,125,50,0.14)] transition-all duration-300 group flex flex-col">
-      <div className="relative overflow-hidden bg-[#F5EDD8] h-48">
+      <div className="relative overflow-hidden bg-[#F5EDD8] h-44 sm:h-48">
         <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute top-3 right-3">
           <span className="bg-[#DB9C23] text-white text-[11px] font-bold px-3 py-1 rounded-full shadow">{product.price}</span>
@@ -337,7 +344,7 @@ function ProductCard({ product, setPage, addToCart }: { product: Product; setPag
         <h3 className="font-bold text-[#DB9C23] text-[15px] leading-snug">{product.name}</h3>
         <p className="text-[#D4A017] text-[12px] font-semibold mb-1">{product.marathi}</p>
         <p className="text-[#6D4C41] text-[13px] leading-relaxed flex-1 line-clamp-2">{product.desc}</p>
-        <div className="grid grid-cols-2 gap-2 mt-3">
+        <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-2 mt-3">
           <button onClick={go} className="py-2 border-2 border-[#DB9C23] text-[#DB9C23] text-[12px] font-bold rounded-xl hover:bg-[#FFF8EC] transition-all duration-200">
             View Details
           </button>
@@ -465,7 +472,7 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
   if (isInsideHero) {
     return (
       <div className="relative w-full z-30">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-6">
             <h2
               className="text-2xl md:text-3xl font-black tracking-wider uppercase mb-1 text-white"
@@ -784,17 +791,17 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
       `}</style>
 
       {/* ── Hero ── */}
-      <section className="hero-cinematic relative overflow-hidden min-h-[100vh] pt-[84px] md:pt-[96px] flex items-center bg-[#140f0b]" style={{ backgroundImage: `url('${activeHeroImage}')` }}>
+      <section className="hero-cinematic relative flex min-h-[100svh] flex-col overflow-hidden bg-[#140f0b] pt-[64px] lg:pt-[80px]" style={{ backgroundImage: `url('${activeHeroImage}')` }}>
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(ellipse at 60% 35%, rgba(255,234,186,0.16) 0%, transparent 60%)" }} />
 
-        <div className="max-w-7xl mx-auto px-6 w-full relative z-10 py-10 md:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full relative z-10 py-8 sm:py-10 md:py-14">
           <div className="flex flex-col items-start pb-2">
             <div className="inline-flex items-center gap-2 bg-white/10 text-[#F8E7B6] text-[11px] font-bold px-4 py-1.5 rounded-full border border-white/20 tracking-widest uppercase mb-5 self-start backdrop-blur-sm shadow-[0_3px_15px_rgba(0,0,0,0.25)]">
               <Leaf size={10} /> Shrujay Food Products
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-[58px] font-extrabold leading-[1.05] mb-3 max-w-4xl" style={{ color: "#FFFFFF", textShadow: "0 3px 15px rgba(0,0,0,.45)" }}>
+            <h1 className="text-[2.15rem] sm:text-4xl md:text-5xl lg:text-[58px] font-extrabold leading-[1.08] mb-3 max-w-4xl" style={{ color: "#FFFFFF", textShadow: "0 3px 15px rgba(0,0,0,.45)" }}>
               Pure. Natural. Traditional. Premium.
             </h1>
             <p className="text-sm md:text-base lg:text-[17px] font-semibold text-white/90 max-w-2xl mb-7" style={{ textShadow: "0 3px 15px rgba(0,0,0,.35)" }}>
@@ -804,9 +811,9 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
               Premium home-made dals, pulses, flours and traditional Indian foods from Pune, made with love, hygiene and generations of trusted family recipes.
             </p>
 
-            <div className="hero-cta flex flex-wrap gap-3 mb-8">
+            <div className="hero-cta grid w-full grid-cols-1 gap-3 mb-8 min-[420px]:flex min-[420px]:w-auto min-[420px]:flex-wrap">
               <button onClick={() => go("products")}
-                className="px-7 py-3 bg-[#DB9C23] text-white font-bold rounded-full hover:bg-[#C17F1A] transition-all duration-200 shadow-[0_10px_28px_rgba(0,0,0,0.22)] flex items-center gap-2 text-[14px]">
+                className="px-7 py-3 bg-[#DB9C23] text-white font-bold rounded-full hover:bg-[#C17F1A] transition-all duration-200 shadow-[0_10px_28px_rgba(0,0,0,0.22)] flex items-center justify-center gap-2 text-[14px]">
                 View Products <ArrowRight size={14} />
               </button>
               <button onClick={() => go("contact")}
@@ -816,7 +823,7 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
             </div>
 
             {/* Stat badges row */}
-            <div className="flex flex-wrap gap-3">
+            <div className="grid w-full grid-cols-1 gap-3 min-[420px]:grid-cols-3 sm:w-auto">
               <div className="inline-flex items-center gap-2.5 bg-white/92 rounded-xl px-4 py-2.5 shadow-sm border border-[#DB9C23]/10 backdrop-blur-sm">
                 <div className="w-8 h-8 rounded-lg bg-[#DB9C23]/10 flex items-center justify-center">
                   <Wheat size={16} className="text-[#DB9C23]" />
@@ -863,8 +870,8 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
 
 
       {/* ── Mission ── */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-14 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <LeafDivider className="mb-6 max-w-xs mx-auto" />
             <SectionPill>Our Mission</SectionPill>
@@ -901,7 +908,7 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
               Everything we do is for one reason — to earn your trust, one meal at a time.
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-5">
             {why.map((f, i) => (
               <div key={i} className="bg-white/[0.10] border border-white/15 rounded-[14px] py-7 px-6 flex flex-col items-center text-center hover:bg-white/[0.18] hover:border-white/30 transition-all duration-200 group">
                 <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-3 text-white group-hover:bg-white group-hover:text-[#DB9C23] transition-all duration-200">
@@ -915,8 +922,8 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
       </section>
 
       {/* ── Featured Products ── */}
-      <section className="py-20 bg-[#FFF8EC]">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-14 sm:py-20 bg-[#FFF8EC]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <LeafDivider className="mb-6 max-w-xs mx-auto" />
             <SectionPill>Featured Products</SectionPill>
@@ -938,8 +945,8 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
       </section>
 
       {/* ── Location ── */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-14 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <LeafDivider className="mb-6 max-w-xs mx-auto" />
             <SectionPill>Find Us</SectionPill>
@@ -954,7 +961,7 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
                 allowFullScreen loading="lazy" title="Shrujay Food Products Location, Pune"
               />
             </div>
-            <div className="lg:col-span-2 bg-[#FFF8EC] rounded-[14px] p-8 border border-[#DB9C23]/10 flex flex-col justify-center gap-5">
+            <div className="lg:col-span-2 bg-[#FFF8EC] rounded-[14px] p-5 sm:p-8 border border-[#DB9C23]/10 flex flex-col justify-center gap-5">
               <div>
                 <h3 className="font-extrabold text-[#DB9C23] text-xl mb-1">Shrujay Food Products</h3>
                 <p className="text-[#6D4C41] text-[13px]">Pune, Maharashtra, India</p>
@@ -991,9 +998,9 @@ function ProductsPage({ setPage, addToCart }: { setPage: (p: Page) => void; addT
   const filtered = active === "All" ? ALL_PRODUCTS : ALL_PRODUCTS.filter(p => p.category === active);
 
   return (
-    <div className="pt-[80px] min-h-screen bg-[#FFF8EC]">
+    <div className="pt-[64px] lg:pt-[80px] min-h-screen bg-[#FFF8EC]">
       {/* Header */}
-      <div className="bg-[#DB9C23] py-16 px-6 relative overflow-hidden">
+      <div className="bg-[#DB9C23] py-12 sm:py-16 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.05]"
           style={{ backgroundImage: "radial-gradient(#fff 1.2px, transparent 1.2px)", backgroundSize: "24px 24px" }} />
         <div className="max-w-7xl mx-auto text-center relative">
@@ -1007,7 +1014,7 @@ function ProductsPage({ setPage, addToCart }: { setPage: (p: Page) => void; addT
 
       {/* Filters */}
       <div className="sticky top-[72px] z-30 bg-white border-b border-[#DB9C23]/10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex gap-2 overflow-x-auto scrollbar-hide">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex gap-2 overflow-x-auto scrollbar-hide">
           {categories.map(c => (
             <button
               key={c}
@@ -1021,7 +1028,7 @@ function ProductsPage({ setPage, addToCart }: { setPage: (p: Page) => void; addT
       </div>
 
       {/* Grid */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <p className="text-[#6D4C41] text-[13px] mb-6 font-medium">{filtered.length} product{filtered.length !== 1 ? "s" : ""} shown</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filtered.map(p => <ProductCard key={p.id} product={p} setPage={setPage} addToCart={addToCart} />)}
@@ -1029,7 +1036,7 @@ function ProductsPage({ setPage, addToCart }: { setPage: (p: Page) => void; addT
       </div>
 
       {/* CTA */}
-      <div className="bg-[#FFF3E0] border-t border-[#D4A017]/20 py-12 text-center">
+      <div className="bg-[#FFF3E0] border-t border-[#D4A017]/20 py-10 px-4 text-center">
         <h3 className="font-extrabold text-[#DB9C23] text-2xl mb-2">Need a Bulk Order?</h3>
         <p className="text-[#6D4C41] text-[15px] mb-5">We supply in bulk for families, restaurants and retailers. Contact us for custom pricing.</p>
         <a href={`tel:${PHONE}`} className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#DB9C23] text-white font-bold rounded-full hover:bg-[#D4A017] transition-all duration-200">
@@ -1043,7 +1050,7 @@ function ProductsPage({ setPage, addToCart }: { setPage: (p: Page) => void; addT
 // ─── PRODUCT DETAIL PAGE ───────────────────────────────────────────────────
 function ProductDetailPage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCart: (product: Product) => void }) {
   return (
-    <div className="pt-[80px] min-h-screen bg-[#FFF8EC]">
+    <div className="pt-[64px] lg:pt-[80px] min-h-screen bg-[#FFF8EC]">
       {/* Hero */}
       <div className="relative h-72 md:h-96 overflow-hidden bg-[#DB9C23]">
         <img
@@ -1051,9 +1058,9 @@ function ProductDetailPage({ setPage, addToCart }: { setPage: (p: Page) => void;
           alt="Fresh Indian dals and pulses collection"
           className="w-full h-full object-cover opacity-40"
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-6">
           <SectionPill>Dal &amp; Pulses</SectionPill>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-3">Homemade Dals &amp; Pulses</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3">Homemade Dals &amp; Pulses</h1>
           <p className="text-[#DB9C23]100 max-w-2xl text-[15px] leading-relaxed">
             Unpolished, naturally sourced dals — no chemicals, no polishing, no third-party sourcing. Straight from local farms to your kitchen.
           </p>
@@ -1061,12 +1068,12 @@ function ProductDetailPage({ setPage, addToCart }: { setPage: (p: Page) => void;
       </div>
 
       {/* Intro */}
-      <div className="max-w-4xl mx-auto px-6 py-12 text-center">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-12 text-center">
         <LeafDivider className="mb-8 max-w-xs mx-auto" />
         <p className="text-[#6D4C41] text-[16px] leading-relaxed">
           At Shrujay Food Products, we believe the best dals come from the best farms. All our dals are <strong className="text-[#DB9C23]">unpolished</strong>, retaining their natural fibre, protein and minerals. We source directly from Pune-region farmers — no middle men, no compromise.
         </p>
-        <div className="mt-8 grid grid-cols-3 gap-4">
+        <div className="mt-8 grid grid-cols-1 min-[420px]:grid-cols-3 gap-3 sm:gap-4">
           {[["Unpolished", "Full nutrition retained"], ["Farm-Direct", "No middlemen"], ["Home-Packed", "Hygienic & fresh"]].map(([h, s]) => (
             <div key={h} className="bg-white rounded-[14px] p-4 border border-[#DB9C23]/10 shadow-sm">
               <div className="font-bold text-[#DB9C23] text-[14px]">{h}</div>
@@ -1077,7 +1084,7 @@ function ProductDetailPage({ setPage, addToCart }: { setPage: (p: Page) => void;
       </div>
 
       {/* Pricing table */}
-      <div className="max-w-4xl mx-auto px-6 pb-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-12">
         <div className="bg-white rounded-[14px] border border-[#DB9C23]/12 shadow-md overflow-hidden">
           <div className="bg-[#DB9C23] px-6 py-5 flex items-center gap-3">
             <Wheat className="text-[#D4A017]" size={22} />
@@ -1088,10 +1095,10 @@ function ProductDetailPage({ setPage, addToCart }: { setPage: (p: Page) => void;
           </div>
           <div className="divide-y divide-[#DB9C23]/8">
             {ALL_PRODUCTS.map((item, i) => (
-              <div key={item.id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 hover:bg-[#FFF8EC] transition-colors ${i % 2 === 0 ? "bg-white" : "bg-[#FFF8EC]/60"}`}>
+              <div key={item.id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 hover:bg-[#FFF8EC] transition-colors ${i % 2 === 0 ? "bg-white" : "bg-[#FFF8EC]/60"}`}>
                 <div>
                   <span className="font-bold text-[#DB9C23] text-[15px]">{item.name}</span>
-                  <span className="ml-3 text-[#D4A017] text-[12px] font-semibold">{item.marathi}</span>
+                  <span className="block sm:ml-3 sm:inline text-[#D4A017] text-[12px] font-semibold">{item.marathi}</span>
                 </div>
                 <div className="flex items-center gap-3 sm:justify-end">
                   <span className="font-extrabold text-[#DB9C23] text-lg">{item.price}</span>
@@ -1141,9 +1148,9 @@ function AboutPage() {
   ];
 
   return (
-    <div className="pt-[80px] min-h-screen">
+    <div className="pt-[64px] lg:pt-[80px] min-h-screen">
       {/* Header */}
-      <div className="bg-gradient-to-br from-[#FFF8E1] to-[#FFF8EC] py-20 px-6 border-b border-[#D4A017]/20">
+      <div className="bg-gradient-to-br from-[#FFF8E1] to-[#FFF8EC] py-14 sm:py-20 px-4 sm:px-6 border-b border-[#D4A017]/20">
         <div className="max-w-7xl mx-auto text-center">
           <SectionPill>Our Story</SectionPill>
           <h1 className="text-4xl md:text-5xl font-extrabold text-[#DB9C23] mb-5">About Srujay Food Products</h1>
@@ -1154,7 +1161,7 @@ function AboutPage() {
       </div>
 
       {/* Story */}
-      <div className="bg-white py-20 px-6">
+      <div className="bg-white py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
             <div>
@@ -1184,7 +1191,7 @@ function AboutPage() {
       </div>
 
       {/* Story timeline */}
-      <div className="bg-[#FFF8E1] py-20 px-6">
+      <div className="bg-[#FFF8E1] py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <SectionPill>Our Philosophy</SectionPill>
@@ -1203,7 +1210,7 @@ function AboutPage() {
       </div>
 
       {/* Portfolio showcase */}
-      <div className="bg-[#FFF9F0] py-20 px-6">
+      <div className="bg-[#FFF9F0] py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-8">
             <SectionPill>Portfolio</SectionPill>
@@ -1218,8 +1225,8 @@ function AboutPage() {
                 style={{ display: 'block' }}
               />
             </div>
-            <div className="p-8 sm:p-10">
-              <h3 className="text-3xl font-bold text-[#2E7D32] mb-4">Srujay Food Products</h3>
+            <div className="p-5 sm:p-10">
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#2E7D32] mb-4">Srujay Food Products</h3>
               <p className="text-[#6D4C41] text-[15px] leading-[1.7] max-w-3xl mb-6">
                 Some brands are built in factories. Shrujay was built in a home kitchen — one dal, one batch, one family recipe at a time. We built them a website that carries the same warmth: bilingual, honest, and unmistakably theirs.
               </p>
@@ -1255,7 +1262,7 @@ function AboutPage() {
             <SectionPill>Our Values</SectionPill>
             <h2 className="text-3xl font-extrabold text-[#DB9C23]">What We Believe In</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
             {[
               { icon: <Leaf size={22}/>,        val: "Purity",     desc: "No chemicals, no additives" },
               { icon: <Shield size={22}/>,       val: "Hygiene",    desc: "Clean, careful handling" },
@@ -1320,9 +1327,9 @@ function ContactPage() {
   ];
 
   return (
-    <div className="pt-[80px] min-h-screen bg-white">
+    <div className="pt-[64px] lg:pt-[80px] min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-[#DB9C23] py-16 px-6 relative overflow-hidden">
+      <div className="bg-[#DB9C23] py-12 sm:py-16 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.05]"
           style={{ backgroundImage: "radial-gradient(#fff 1.2px, transparent 1.2px)", backgroundSize: "24px 24px" }} />
         <div className="max-w-7xl mx-auto text-center relative">
@@ -1335,7 +1342,7 @@ function ContactPage() {
       </div>
 
       {/* Info cards */}
-      <div className="max-w-5xl mx-auto px-6 py-14">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-14">
           {cards.map((c, i) => (
             <div key={i} className="bg-[#FFF8EC] rounded-[14px] p-5 border border-[#DB9C23]/10 hover:shadow-[0_4px_20px_rgba(46,125,50,0.10)] transition-all duration-200 hover:border-[#D4A017]/35">
@@ -1347,7 +1354,7 @@ function ContactPage() {
         </div>
 
         {/* Form + Map */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12">
           {/* Form */}
           <div>
             <h2 className="text-2xl font-extrabold text-[#DB9C23] mb-6">Send an Enquiry</h2>
@@ -1397,7 +1404,7 @@ function ContactPage() {
           {/* Map */}
           <div>
             <h2 className="text-2xl font-extrabold text-[#DB9C23] mb-6">Our Location</h2>
-            <div className="rounded-[14px] overflow-hidden shadow-md border border-[#DB9C23]/10" style={{ height: 380 }}>
+            <div className="h-[280px] sm:h-[380px] rounded-[14px] overflow-hidden shadow-md border border-[#DB9C23]/10">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.0!2d73.9641990!3d18.4956049!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2eac93e1f9d47%3A0x0!2zMTjCsDI5JzQ0LjIiTiA3M8KwNTgnMDAuNCJF!5e0!3m2!1sen!2sin!4v1700000000002!5m2!1sen!2sin"
                 width="100%" height="100%" style={{ border: 0, display: "block" }}
@@ -1469,7 +1476,7 @@ function CartDrawer({
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {items.map(({ product, quantity }) => (
                 <div key={product.id} className="bg-white rounded-2xl border border-[#DB9C23]/15 p-3 flex gap-3 shadow-sm">
-                  <img src={product.img} alt={product.name} className="w-20 h-20 rounded-xl object-cover bg-[#F5EDD8] flex-shrink-0" />
+                  <img src={product.img} alt={product.name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover bg-[#F5EDD8] flex-shrink-0" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
                       <div>
@@ -1480,7 +1487,7 @@ function CartDrawer({
                         <Trash2 size={15} />
                       </button>
                     </div>
-                    <div className="mt-2 flex items-center justify-between">
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center border border-[#DB9C23]/20 rounded-lg overflow-hidden">
                         <button
                           onClick={() => changeQuantity(product.id, quantity - QUANTITY_STEP_KG)}
@@ -1603,6 +1610,3 @@ export default function App() {
     </div>
   );
 }
-
-
-

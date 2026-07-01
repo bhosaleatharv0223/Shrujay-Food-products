@@ -212,8 +212,8 @@ export function OrderModal({ open, onClose, items }: Props) {
 
   return (
     <AnimatePresence>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[120] flex items-center justify-center bg-[#140F0B]/70 p-3 sm:p-6">
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="max-h-[95vh] w-full max-w-6xl overflow-y-auto rounded-[32px] border border-[#E4D2B4] bg-[#FFFDF8] shadow-[0_30px_80px_rgba(0,0,0,0.25)]">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[120] flex items-end justify-center bg-[#140F0B]/70 sm:items-center sm:p-6">
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="max-h-[100dvh] w-full max-w-6xl overflow-x-hidden overflow-y-auto rounded-t-[24px] border border-[#E4D2B4] bg-[#FFFDF8] shadow-[0_30px_80px_rgba(0,0,0,0.25)] sm:max-h-[95vh] sm:rounded-[32px]">
           <div className="flex items-center justify-between border-b border-[#E4D2B4] bg-[#FFF9F0] px-5 py-4 sm:px-7">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#A86E34]">Premium Checkout</p>
@@ -224,7 +224,7 @@ export function OrderModal({ open, onClose, items }: Props) {
             </button>
           </div>
 
-          <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="grid gap-5 p-3 sm:gap-6 sm:p-6 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-6">
               <div className="rounded-[24px] border border-[#E4D2B4] bg-white p-4 shadow-sm sm:p-5">
                 <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
