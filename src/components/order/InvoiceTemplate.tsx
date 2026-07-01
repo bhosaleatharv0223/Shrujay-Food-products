@@ -1,5 +1,6 @@
 import { Instagram, Facebook, MessageSquare, Phone, MapPin, Truck, Package, Leaf } from 'lucide-react';
 import type { InvoiceData } from '@/types/order';
+import { calculateLineTotal, formatCurrency } from '@/utils/pricing';
 
 type Props = {
   data: InvoiceData;
@@ -9,10 +10,6 @@ type Props = {
 const brown = '#6B4226';
 const cream = '#FFF8EF';
 const green = '#2E7D32';
-
-function formatCurrency(value: number) {
-  return `₹${value.toLocaleString('en-IN')}`;
-}
 
 export function InvoiceTemplate({ data, amountInWords }: Props) {
   return (
@@ -106,10 +103,10 @@ export function InvoiceTemplate({ data, amountInWords }: Props) {
                   <div className="text-[12px] text-[#6B4226]">{item.marathi}</div>
                 </div>
               </div>
-              <div className="text-right">{item.quantity}</div>
+              <div className="text-right">{item.quantity} kg</div>
               <div className="text-right">{item.unit ?? 'Kg'}</div>
               <div className="text-right">{formatCurrency(item.price)}</div>
-              <div className="text-right">{formatCurrency(item.price * item.quantity)}</div>
+              <div className="text-right">{formatCurrency(calculateLineTotal(item.price, item.quantity))}</div>
             </div>
           ))}
         </div>

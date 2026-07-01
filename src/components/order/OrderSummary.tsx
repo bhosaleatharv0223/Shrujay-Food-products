@@ -1,4 +1,5 @@
 import type { CustomerDetails, DeliveryLocation, OrderItem } from '@/types/order';
+import { calculateLineTotal, formatCurrency } from '@/utils/pricing';
 
 type Props = {
   items: OrderItem[];
@@ -24,21 +25,21 @@ export function OrderSummary({ items, subtotal, deliveryCharges, discount, grand
             <img src={item.image} alt={item.name} className="h-16 w-16 rounded-xl object-cover" />
             <div className="flex-1">
               <p className="font-semibold text-[#2C1810]">{item.name}</p>
-              <p className="text-sm text-[#6D4C41]">Qty {item.quantity}</p>
+              <p className="text-sm text-[#6D4C41]">{item.quantity} kg</p>
             </div>
             <div className="text-right">
-              <p className="text-sm font-semibold text-[#6B4226]">₹{item.price * item.quantity}</p>
-              <p className="text-xs text-[#8B5E3C]">₹{item.price} each</p>
+              <p className="text-sm font-semibold text-[#6B4226]">{formatCurrency(calculateLineTotal(item.price, item.quantity))}</p>
+              <p className="text-xs text-[#8B5E3C]">{formatCurrency(item.price)}/kg</p>
             </div>
           </div>
         ))}
       </div>
 
       <div className="rounded-2xl border border-[#E4D2B4] bg-[#FFF9F0] p-4 text-sm text-[#5A3822]">
-        <div className="mb-2 flex justify-between"><span>Subtotal</span><span>₹{subtotal}</span></div>
-        <div className="mb-2 flex justify-between"><span>Delivery Charges</span><span>₹{deliveryCharges}</span></div>
-        <div className="mb-2 flex justify-between"><span>Discount</span><span>₹{discount}</span></div>
-        <div className="mt-3 flex justify-between border-t border-[#E4D2B4] pt-3 text-base font-semibold text-[#6B4226]"><span>Grand Total</span><span>₹{grandTotal}</span></div>
+        <div className="mb-2 flex justify-between"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
+        <div className="mb-2 flex justify-between"><span>Delivery Charges</span><span>{formatCurrency(deliveryCharges)}</span></div>
+        <div className="mb-2 flex justify-between"><span>Discount</span><span>{formatCurrency(discount)}</span></div>
+        <div className="mt-3 flex justify-between border-t border-[#E4D2B4] pt-3 text-base font-semibold text-[#6B4226]"><span>Grand Total</span><span>{formatCurrency(grandTotal)}</span></div>
       </div>
     </div>
   );

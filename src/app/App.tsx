@@ -10,6 +10,13 @@ import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import logoImg from "@/imports/1000322130.jpg";
 import { OrderModal } from '@/components/order/OrderModal';
 import type { OrderItem } from '@/types/order';
+import {
+  calculateLineTotal,
+  formatCurrency,
+  MIN_QUANTITY_KG,
+  normalizeQuantity,
+  QUANTITY_STEP_KG,
+} from '@/utils/pricing';
 
 type Page = "home" | "products" | "product-detail" | "about" | "contact";
 type Product = {
@@ -1423,11 +1430,14 @@ function CartDrawer({
   open: boolean;
   items: CartItem[];
   close: () => void;
-  changeQuantity: (productId: number, delta: number) => void;
+  changeQuantity: (productId: number, quantity: number) => void;
   removeItem: (productId: number) => void;
   onCheckout: () => void;
 }) {
-  const total = items.reduce((sum, item) => sum + item.product.priceValue * item.quantity, 0);
+  const total = items.reduce(
+    (sum, item) => sum + calculateLineTotal(item.product.priceValue, item.quantity),
+    0,
+  );
 
   if (!open) return null;
 
@@ -1472,15 +1482,38 @@ function CartDrawer({
                     </div>
                     <div className="mt-2 flex items-center justify-between">
                       <div className="flex items-center border border-[#DB9C23]/20 rounded-lg overflow-hidden">
-                        <button onClick={() => changeQuantity(product.id, -1)} className="w-8 h-7 flex items-center justify-center hover:bg-[#FFF3E0]" aria-label={`Decrease ${product.name}`}>
+                        <button
+                          onClick={() => changeQuantity(product.id, quantity - QUANTITY_STEP_KG)}
+                          disabled={quantity <= MIN_QUANTITY_KG}
+                          className="w-8 h-8 flex items-center justify-center hover:bg-[#FFF3E0] disabled:cursor-not-allowed disabled:opacity-35"
+                          aria-label={`Decrease ${product.name} by 0.1 kilogram`}
+                        >
                           <Minus size={12} />
                         </button>
-                        <span className="w-8 text-center text-[12px] font-bold">{quantity}</span>
-                        <button onClick={() => changeQuantity(product.id, 1)} className="w-8 h-7 flex items-center justify-center hover:bg-[#FFF3E0]" aria-label={`Increase ${product.name}`}>
+                        <input
+                          type="number"
+                          min={MIN_QUANTITY_KG}
+                          step={QUANTITY_STEP_KG}
+                          value={quantity}
+                          onChange={(event) => {
+                            const nextQuantity = Number(event.target.value);
+                            if (Number.isFinite(nextQuantity)) changeQuantity(product.id, nextQuantity);
+                          }}
+                          aria-label={`${product.name} quantity in kilograms`}
+                          className="w-14 h-8 border-x border-[#DB9C23]/20 bg-transparent text-center text-[12px] font-bold outline-none"
+                        />
+                        <span className="pr-2 text-[10px] font-semibold text-[#6D4C41]">kg</span>
+                        <button
+                          onClick={() => changeQuantity(product.id, quantity + QUANTITY_STEP_KG)}
+                          className="w-8 h-8 flex items-center justify-center hover:bg-[#FFF3E0]"
+                          aria-label={`Increase ${product.name} by 0.1 kilogram`}
+                        >
                           <Plus size={12} />
                         </button>
                       </div>
-                      <span className="font-extrabold text-[#DB9C23] text-[14px]">₹{product.priceValue * quantity}</span>
+                      <span className="font-extrabold text-[#DB9C23] text-[14px]">
+                        {formatCurrency(calculateLineTotal(product.priceValue, quantity))}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1489,7 +1522,7 @@ function CartDrawer({
             <div className="border-t border-[#DB9C23]/15 bg-white p-5">
               <div className="flex items-center justify-between mb-4">
                 <span className="font-semibold text-[#6D4C41]">Estimated total</span>
-                <span className="font-extrabold text-[#174C2C] text-2xl">₹{total}</span>
+                <span className="font-extrabold text-[#174C2C] text-2xl">{formatCurrency(total)}</span>
               </div>
               <p className="text-[10px] text-[#6D4C41]/70 mb-3">Quantity is calculated in kilograms. Delivery charges may apply.</p>
               <button
@@ -1517,24 +1550,26 @@ export default function App() {
     setCartItems(current => {
       const existing = current.find(item => item.product.id === product.id);
       if (existing) {
-        return current.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        return current.map(item => item.product.id === product.id
+          ? { ...item, quantity: normalizeQuantity(item.quantity + MIN_QUANTITY_KG) }
+          : item);
       }
-      return [...current, { product, quantity: 1 }];
+      return [...current, { product, quantity: MIN_QUANTITY_KG }];
     });
     setCartOpen(true);
   };
 
-  const changeQuantity = (productId: number, delta: number) => {
-    setCartItems(current => current
-      .map(item => item.product.id === productId ? { ...item, quantity: item.quantity + delta } : item)
-      .filter(item => item.quantity > 0));
+  const changeQuantity = (productId: number, quantity: number) => {
+    setCartItems(current => current.map(item => item.product.id === productId
+      ? { ...item, quantity: normalizeQuantity(quantity) }
+      : item));
   };
 
   const removeItem = (productId: number) => {
     setCartItems(current => current.filter(item => item.product.id !== productId));
   };
 
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = cartItems.length;
 
   const checkoutItems: OrderItem[] = cartItems.map(item => ({
     id: item.product.id,
@@ -1568,8 +1603,6 @@ export default function App() {
     </div>
   );
 }
-
-
 
 
 

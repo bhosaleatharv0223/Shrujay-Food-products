@@ -13,6 +13,7 @@ import { generateInvoicePdf } from '@/services/billGenerator';
 import { uploadInvoiceToCloudinary, validatePdf, verifyCloudinaryPdf } from '@/services/cloudinary';
 import { buildWhatsAppUrl } from '@/services/whatsapp';
 import type { CustomerDetails, DeliveryLocation, InvoiceData, OrderItem } from '@/types/order';
+import { calculateLineTotal, formatCurrency } from '@/utils/pricing';
 
 type Props = {
   readonly open: boolean;
@@ -59,7 +60,10 @@ export function OrderModal({ open, onClose, items }: Props) {
   const [isWhatsAppLoading, setIsWhatsAppLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.price * item.quantity, 0), [items]);
+  const subtotal = useMemo(
+    () => items.reduce((sum, item) => sum + calculateLineTotal(item.price, item.quantity), 0),
+    [items],
+  );
   const deliveryCharges = subtotal > 0 ? 30 : 0;
   const discount = 0;
   const grandTotal = subtotal + deliveryCharges - discount;
@@ -139,8 +143,8 @@ export function OrderModal({ open, onClose, items }: Props) {
       `OpenStreetMap Location: ${delivery.address} (${delivery.latitude.toFixed(6)}, ${delivery.longitude.toFixed(6)})`,
       `Google Maps Link: ${delivery.googleMapsUrl ?? 'https://www.google.com/maps?q=' + delivery.latitude + ',' + delivery.longitude}`,
       'Products:',
-      ...items.map(item => `${item.name} x ${item.quantity} - ₹${item.price * item.quantity}`),
-      `Grand Total: ₹${grandTotal}`,
+      ...items.map(item => `${item.name} - ${item.quantity} kg - ${formatCurrency(calculateLineTotal(item.price, item.quantity))}`),
+      `Grand Total: ${formatCurrency(grandTotal)}`,
       `Cloudinary Invoice URL: ${invoice?.cloudinaryUrl ?? 'Pending'}`,
       '━━━━━━━━━━━━━━',
     ].join('\n');
