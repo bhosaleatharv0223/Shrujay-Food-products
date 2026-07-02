@@ -28,11 +28,14 @@ export type DeliveryLocation = {
   googleMapsUrl?: string;
 };
 
+export type DeliveryMethod = 'courier' | 'porter';
+
 export type InvoiceData = {
   invoiceNumber: string;
   issuedAt: string;
   customer: CustomerDetails;
   delivery: DeliveryLocation;
+  deliveryMethod: DeliveryMethod;
   items: OrderItem[];
   subtotal: number;
   deliveryCharges: number;

@@ -1,17 +1,18 @@
-import type { CustomerDetails, DeliveryLocation, OrderItem } from '@/types/order';
+import type { CustomerDetails, DeliveryLocation, DeliveryMethod, OrderItem } from '@/types/order';
 import { calculateLineTotal, formatCurrency } from '@/utils/pricing';
 
 type Props = {
   items: OrderItem[];
   customer: CustomerDetails;
   delivery: DeliveryLocation;
+  deliveryMethod: DeliveryMethod;
   subtotal: number;
   deliveryCharges: number;
   discount: number;
   grandTotal: number;
 };
 
-export function OrderSummary({ items, subtotal, deliveryCharges, discount, grandTotal }: Props) {
+export function OrderSummary({ items, deliveryMethod, subtotal, deliveryCharges, discount, grandTotal }: Props) {
   return (
     <div className="space-y-4 rounded-[24px] border border-[#E4D2B4] bg-[#FFFDF8] p-4 shadow-sm sm:rounded-[28px] sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -37,7 +38,10 @@ export function OrderSummary({ items, subtotal, deliveryCharges, discount, grand
 
       <div className="rounded-2xl border border-[#E4D2B4] bg-[#FFF9F0] p-4 text-sm text-[#5A3822]">
         <div className="mb-2 flex justify-between"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
-        <div className="mb-2 flex justify-between"><span>Delivery Charges</span><span>{formatCurrency(deliveryCharges)}</span></div>
+        <div className="mb-2 flex justify-between"><span>Delivery ({deliveryMethod === 'porter' ? 'Porter' : 'Courier'})</span><span>{formatCurrency(deliveryCharges)}</span></div>
+        {deliveryMethod === 'porter' && (
+          <p className="mb-2 rounded-xl bg-amber-50 p-2 text-xs text-amber-900">Porter charges are paid separately by the customer and are not included here.</p>
+        )}
         <div className="mb-2 flex justify-between"><span>Discount</span><span>{formatCurrency(discount)}</span></div>
         <div className="mt-3 flex justify-between border-t border-[#E4D2B4] pt-3 text-base font-semibold text-[#6B4226]"><span>Grand Total</span><span>{formatCurrency(grandTotal)}</span></div>
       </div>

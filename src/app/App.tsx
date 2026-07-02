@@ -298,7 +298,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
 
 // ─── Products data ─────────────────────────────────────────────────────────
 const ALL_PRODUCTS: Product[] = [
-  { id: 1,  name: "Toor Dal", marathi: "तूर डाळ", desc: "Premium unpolished toor dal, naturally sourced. Rich in protein and ideal for everyday cooking.", price: "₹170/kg", priceValue: 170, category: "Dal & Pulses", img: "https://images.unsplash.com/photo-1701166175567-2f55dd40e662?w=480&h=360&fit=crop&auto=format" },
+  { id: 1,  name: "Toor Dal", marathi: "तूर डाळ", desc: "Premium unpolished toor dal, naturally sourced. Rich in protein and ideal for everyday cooking.", price: "₹170/kg", priceValue: 170, category: "Dal & Pulses", img: "/WhatsApp%20Image%202026-07-02%20at%201.04.53%20PM.jpeg" },
   { id: 2,  name: "Gavaran Moong Dal", marathi: "गावरान मूग डाळ", desc: "घरगुती पद्धतीने भरडलेली मूग डाळ — gharaguti padhatine bharadleli moong dal.", price: "₹160/kg", priceValue: 160, category: "Dal & Pulses", img: "/1000322276.jpg" },
   { id: 3,  name: "Gavaran Chana Dal", marathi: "गावरान चणा डाळ", desc: "घरगुती पद्धतीने भरडलेली चणा डाळ — gharaguti padhatine bharadleli chana dal.", price: "₹120/kg", priceValue: 120, category: "Dal & Pulses", img: "/1000322275.jpg" },
   { id: 4,  name: "Urad Dal", marathi: "उडीद डाळ", desc: "Whole and split black gram — essential for idli, dosa batter and traditional dal recipes.", price: "₹160/kg", priceValue: 160, category: "Dal & Pulses", img: "/1000322277.jpg" },
@@ -480,7 +480,7 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
             >
               QUICK SHOP
             </h2>
-            <p className="text-[#6D4C41] text-[12px] font-bold tracking-wide">
+            <p className="text-[#DB9C23] text-[12px] font-bold tracking-wide">
               आमची सर्व उत्पादने एका क्लिकवर
             </p>
           </div>
@@ -601,7 +601,7 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
           <h2 className="text-3xl font-black text-[#2E7D32] tracking-wider uppercase mb-1">
             QUICK SHOP
           </h2>
-          <p className="text-[#6D4C41] text-[14px] font-medium tracking-wide">
+          <p className="text-[#DB9C23] text-[14px] font-medium tracking-wide">
             आमची सर्व उत्पादने एका क्लिकवर
           </p>
         </div>
@@ -723,14 +723,6 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
 
   const activeHeroImage = HERO_IMAGES[heroImageIndex];
 
-  const mission = [
-    { icon: <Leaf size={20} />,         title: "100% Natural",       desc: "No artificial additives or preservatives — pure, as nature intended." },
-    { icon: <Shield size={20} />,        title: "Strict Hygiene",     desc: "Processed in a clean, hygienic home kitchen with utmost care." },
-    { icon: <Heart size={20} />,         title: "Affordable Pricing", desc: "Fair prices without compromising quality — value for every rupee." },
-    { icon: <Star size={20} />,          title: "Customer Trust",     desc: "Built on word-of-mouth and repeat customers across Pune." },
-    { icon: <CheckCircle size={20} />,   title: "Healthy Living",     desc: "Unpolished dals & grains that preserve natural nutrients fully." },
-  ];
-
   const why = [
     { icon: <CheckCircle size={18} />, label: "Quality Checked" },
     { icon: <Leaf size={18} />,        label: "100% Fresh" },
@@ -791,74 +783,45 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
       `}</style>
 
       {/* ── Hero ── */}
-      <section className="hero-cinematic relative flex min-h-[100svh] flex-col overflow-hidden bg-[#140f0b] pt-[64px] lg:pt-[80px]" style={{ backgroundImage: `url('${activeHeroImage}')` }}>
+      <section className="hero-cinematic relative flex min-h-[72svh] flex-col overflow-hidden bg-[#140f0b] pt-[64px] lg:pt-[80px]" style={{ backgroundImage: `url('${activeHeroImage}')` }}>
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(ellipse at 60% 35%, rgba(255,234,186,0.16) 0%, transparent 60%)" }} />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full relative z-10 py-8 sm:py-10 md:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full relative z-10 py-6 sm:py-10 md:py-14">
           <div className="flex flex-col items-start pb-2">
             <div className="inline-flex items-center gap-2 bg-white/10 text-[#F8E7B6] text-[11px] font-bold px-4 py-1.5 rounded-full border border-white/20 tracking-widest uppercase mb-5 self-start backdrop-blur-sm shadow-[0_3px_15px_rgba(0,0,0,0.25)]">
               <Leaf size={10} /> Shrujay Food Products
             </div>
 
             <h1 className="text-[2.15rem] sm:text-4xl md:text-5xl lg:text-[58px] font-extrabold leading-[1.08] mb-3 max-w-4xl" style={{ color: "#FFFFFF", textShadow: "0 3px 15px rgba(0,0,0,.45)" }}>
-              Pure. Natural. Traditional. Premium.
+              Wholesome Food for Every Home.
             </h1>
             <p className="text-sm md:text-base lg:text-[17px] font-semibold text-white/90 max-w-2xl mb-7" style={{ textShadow: "0 3px 15px rgba(0,0,0,.35)" }}>
               Buy Pure, Natural &amp; Chemical-Free Food Products Online
             </p>
-            <p className="text-sm md:text-[15px] lg:text-[16px] font-medium text-[#F8E7B6] max-w-2xl mb-7" style={{ textShadow: "0 3px 15px rgba(0,0,0,.35)" }}>
+            <p className="text-sm md:text-[15px] lg:text-[16px] font-medium text-[#F8E7B6] max-w-2xl mb-4 sm:mb-7" style={{ textShadow: "0 3px 15px rgba(0,0,0,.35)" }}>
               Premium home-made dals, pulses, flours and traditional Indian foods from Pune, made with love, hygiene and generations of trusted family recipes.
             </p>
 
-            <div className="hero-cta grid w-full grid-cols-1 gap-3 mb-8 min-[420px]:flex min-[420px]:w-auto min-[420px]:flex-wrap">
-              <button onClick={() => go("products")}
-                className="px-7 py-3 bg-[#DB9C23] text-white font-bold rounded-full hover:bg-[#C17F1A] transition-all duration-200 shadow-[0_10px_28px_rgba(0,0,0,0.22)] flex items-center justify-center gap-2 text-[14px]">
-                View Products <ArrowRight size={14} />
-              </button>
-              <button onClick={() => go("contact")}
-                className="px-7 py-3 bg-white/12 border border-white/35 text-white font-bold rounded-full hover:bg-white hover:text-[#DB9C23] transition-all duration-200 text-[14px] backdrop-blur-sm shadow-[0_10px_28px_rgba(0,0,0,0.18)]">
-                Contact Us
-              </button>
-            </div>
+            <div className="flex flex-col gap-3 sm:gap-6 mb-4 sm:mb-8">
+              <div className="order-2 lg:order-1 hero-cta grid w-full grid-cols-1 gap-3 min-[420px]:flex min-[420px]:w-auto min-[420px]:flex-wrap">
+                <button onClick={() => go("products")}
+                  className="px-7 py-3 bg-[#DB9C23] text-white font-bold rounded-full hover:bg-[#C17F1A] transition-all duration-200 shadow-[0_10px_28px_rgba(0,0,0,0.22)] flex items-center justify-center gap-2 text-[14px]">
+                  View Products <ArrowRight size={14} />
+                </button>
+                <button onClick={() => go("contact")}
+                  className="px-7 py-3 bg-white/12 border border-white/35 text-white font-bold rounded-full hover:bg-white hover:text-[#DB9C23] transition-all duration-200 text-[14px] backdrop-blur-sm shadow-[0_10px_28px_rgba(0,0,0,0.18)]">
+                  Contact Us
+                </button>
+              </div>
 
-            {/* Stat badges row */}
-            <div className="grid w-full grid-cols-1 gap-3 min-[420px]:grid-cols-3 sm:w-auto">
-              <div className="inline-flex items-center gap-2.5 bg-white/92 rounded-xl px-4 py-2.5 shadow-sm border border-[#DB9C23]/10 backdrop-blur-sm">
-                <div className="w-8 h-8 rounded-lg bg-[#DB9C23]/10 flex items-center justify-center">
-                  <Wheat size={16} className="text-[#DB9C23]" />
-                </div>
-                <div>
-                  <div className="font-extrabold text-[#DB9C23] text-[18px] leading-none">8+</div>
-                  <div className="text-[#6D4C41] text-[10px] font-semibold mt-0.5">Pure Varieties</div>
-                </div>
-              </div>
-              <div className="inline-flex items-center gap-2.5 bg-white/92 rounded-xl px-4 py-2.5 shadow-sm border border-[#D4A017]/20 backdrop-blur-sm">
-                <div className="w-8 h-8 rounded-lg bg-[#D4A017]/10 flex items-center justify-center">
-                  <Star size={16} className="text-[#D4A017] fill-[#D4A017]" />
-                </div>
-                <div>
-                  <div className="font-extrabold text-[#DB9C23] text-[18px] leading-none">100%</div>
-                  <div className="text-[#6D4C41] text-[10px] font-semibold mt-0.5">Natural &amp; Pure</div>
-                </div>
-              </div>
-              <div className="inline-flex items-center gap-2.5 bg-white/92 rounded-xl px-4 py-2.5 shadow-sm border border-[#DB9C23]/10 backdrop-blur-sm">
-                <div className="w-8 h-8 rounded-lg bg-[#DB9C23]/10 flex items-center justify-center">
-                  <Truck size={16} className="text-[#DB9C23]" />
-                </div>
-                <div>
-                  <div className="font-extrabold text-[#DB9C23] text-[15px] leading-none">Fastest</div>
-                  <div className="text-[#6D4C41] text-[10px] font-semibold mt-0.5">Delivery</div>
-                </div>
+              {/* ── Quick Shop row — full-width, same hero background ── */}
+              <div className="order-1 lg:order-2 relative w-full border-t border-white/20 pt-2 pb-4 px-0 z-10">
+                <QuickShop setPage={setPage} addToCart={addToCart} isInsideHero={true} />
               </div>
             </div>
           </div>
         </div>{/* end max-w-7xl */}
-
-        {/* ── Quick Shop row — full-width, same hero background ── */}
-        <div className="relative w-full border-t border-white/20 pt-1 pb-6 px-0 z-10">
-          <QuickShop setPage={setPage} addToCart={addToCart} isInsideHero={true} />
-        </div>
 
         {/* bottom white wave */}
         <div className="w-full overflow-hidden leading-none relative z-10">
@@ -868,28 +831,25 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
         </div>
       </section>
 
-
-      {/* ── Mission ── */}
-      <section className="py-14 sm:py-20 bg-white">
+      {/* ── Featured Products ── */}
+      <section className="py-14 sm:py-20 bg-[#FFF8EC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <LeafDivider className="mb-6 max-w-xs mx-auto" />
-            <SectionPill>Our Mission</SectionPill>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-[#DB9C23] mb-3">What We Stand For</h2>
+            <SectionPill>Featured Products</SectionPill>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-[#DB9C23] mb-3">Our Best Sellers</h2>
             <p className="text-[#6D4C41] max-w-lg mx-auto text-[15px] leading-relaxed">
-              Every family deserves food that is as pure as nature made it — from farm to your kitchen table.
+              Unpolished, naturally sourced dals and pulses — packed fresh and delivered to your home.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-            {mission.map((m, i) => (
-              <div key={i} className="text-center p-6 bg-[#FFF8EC] rounded-[14px] border border-[#DB9C23]/10 hover:border-[#D4A017]/40 hover:shadow-[0_4px_24px_rgba(46,125,50,0.1)] transition-all duration-300 group">
-                <div className="w-12 h-12 rounded-full bg-[#DB9C23]/10 flex items-center justify-center mx-auto mb-4 text-[#DB9C23] group-hover:bg-[#DB9C23] group-hover:text-white transition-all duration-200">
-                  {m.icon}
-                </div>
-                <h3 className="font-bold text-[#DB9C23] text-[13px] mb-2 leading-snug">{m.title}</h3>
-                <p className="text-[#6D4C41] text-[12px] leading-relaxed">{m.desc}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {ALL_PRODUCTS.slice(0, 4).map(p => <ProductCard key={p.id} product={p} setPage={setPage} addToCart={addToCart} />)}
+          </div>
+          <div className="text-center mt-10">
+            <button onClick={() => go("products")}
+              className="px-10 py-3.5 bg-[#DB9C23] text-white font-bold rounded-full hover:bg-[#D4A017] transition-all duration-200 inline-flex items-center gap-2 shadow-lg shadow-green-900/15">
+              View All Products <ArrowRight size={15} />
+            </button>
           </div>
         </div>
       </section>
@@ -917,29 +877,6 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
                 <span className="text-white font-bold text-[17px] leading-snug">{f.label}</span>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Featured Products ── */}
-      <section className="py-14 sm:py-20 bg-[#FFF8EC]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <LeafDivider className="mb-6 max-w-xs mx-auto" />
-            <SectionPill>Featured Products</SectionPill>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-[#DB9C23] mb-3">Our Best Sellers</h2>
-            <p className="text-[#6D4C41] max-w-lg mx-auto text-[15px] leading-relaxed">
-              Unpolished, naturally sourced dals and pulses — packed fresh and delivered to your home.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {ALL_PRODUCTS.slice(0, 4).map(p => <ProductCard key={p.id} product={p} setPage={setPage} addToCart={addToCart} />)}
-          </div>
-          <div className="text-center mt-10">
-            <button onClick={() => go("products")}
-              className="px-10 py-3.5 bg-[#DB9C23] text-white font-bold rounded-full hover:bg-[#D4A017] transition-all duration-200 inline-flex items-center gap-2 shadow-lg shadow-green-900/15">
-              View All Products <ArrowRight size={15} />
-            </button>
           </div>
         </div>
       </section>
@@ -1153,7 +1090,7 @@ function AboutPage() {
       <div className="bg-gradient-to-br from-[#FFF8E1] to-[#FFF8EC] py-14 sm:py-20 px-4 sm:px-6 border-b border-[#D4A017]/20">
         <div className="max-w-7xl mx-auto text-center">
           <SectionPill>Our Story</SectionPill>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-[#DB9C23] mb-5">About Srujay Food Products</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-[#DB9C23] mb-5">About Shrujay Food Products</h1>
           <p className="text-[#6D4C41] max-w-2xl mx-auto text-[16px] leading-relaxed">
             A home-based food brand rooted in the belief that what you eat should be pure, natural and made with love — just like your grandmother used to make it.
           </p>
@@ -1220,13 +1157,17 @@ function AboutPage() {
             <div className="relative overflow-hidden bg-[#FFF9F0]">
               <img
                 src="/assets/1000322279.jpg"
-                alt="SHRUJAY FOOD PRODUCTS project showcase"
+                alt="Shruti Vijay Takawane, Founder of Shrujay Food Products"
                 className="w-full max-w-[900px] mx-auto rounded-[16px] shadow-[0_18px_60px_rgba(46,125,50,0.12)] object-cover"
                 style={{ display: 'block' }}
               />
+              <div className="px-4 py-4 text-center">
+                <p className="text-[#2E7D32] text-lg sm:text-xl font-bold">Shruti Vijay Takawane</p>
+                <p className="text-[#6D4C41] text-[13px] sm:text-[14px] font-medium">Founder of Shrujay Food Products</p>
+              </div>
             </div>
             <div className="p-5 sm:p-10">
-              <h3 className="text-2xl sm:text-3xl font-bold text-[#2E7D32] mb-4">Srujay Food Products</h3>
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#2E7D32] mb-4">Shrujay Food Products</h3>
               <p className="text-[#6D4C41] text-[15px] leading-[1.7] max-w-3xl mb-6">
                 Some brands are built in factories. Shrujay was built in a home kitchen — one dal, one batch, one family recipe at a time. We built them a website that carries the same warmth: bilingual, honest, and unmistakably theirs.
               </p>
@@ -1306,12 +1247,32 @@ function ContactPage() {
     {
       icon: <Instagram size={22} />,
       label: "Instagram",
-      content: <p className="text-[#6D4C41] text-[14px]">{INSTAGRAM_HANDLE}</p>,
+      content: (
+        <a
+          href="https://www.instagram.com/shrujay_food_products/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block text-[#6D4C41] text-[14px] font-medium hover:text-[#DB9C23] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DB9C23]/40 rounded"
+          aria-label="Open Shrujay Food Products on Instagram"
+        >
+          {INSTAGRAM_HANDLE} →
+        </a>
+      ),
     },
     {
       icon: <MapPin size={22} />,
       label: "Location",
-      content: <p className="text-[#6D4C41] text-[14px] leading-relaxed">Pune, Maharashtra<br />India — 411 000</p>,
+      content: (
+        <a
+          href="https://www.google.com/maps/search/?api=1&query=18.4956%2C73.9668"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block text-[#6D4C41] text-[14px] leading-relaxed font-medium hover:text-[#DB9C23] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DB9C23]/40 rounded"
+          aria-label="Open Shrujay Food Products location in Google Maps"
+        >
+          Pune, Maharashtra<br />India — 411 000 →
+        </a>
+      ),
     },
     {
       icon: <Truck size={22} />,

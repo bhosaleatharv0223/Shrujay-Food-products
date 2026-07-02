@@ -1,9 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle2, X } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Package, Truck, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CustomerForm } from './CustomerForm';
 import { LocationPicker } from './LocationPicker';
-import { OrderSummary } from './OrderSummary';
 import { GenerateBillButton } from './GenerateBillButton';
 import { InvoicePreview } from './InvoicePreview';
 import { ContinueWhatsAppButton } from './ContinueWhatsAppButton';
@@ -12,7 +11,7 @@ import { SuccessDialog } from './SuccessDialog';
 import { generateInvoicePdf } from '@/services/billGenerator';
 import { uploadInvoiceToCloudinary, validatePdf, verifyCloudinaryPdf } from '@/services/cloudinary';
 import { buildWhatsAppUrl } from '@/services/whatsapp';
-import type { CustomerDetails, DeliveryLocation, InvoiceData, OrderItem } from '@/types/order';
+import type { CustomerDetails, DeliveryLocation, DeliveryMethod, InvoiceData, OrderItem } from '@/types/order';
 import { calculateLineTotal, formatCurrency } from '@/utils/pricing';
 
 type Props = {
@@ -42,8 +41,9 @@ const defaultLocation: DeliveryLocation = {
 };
 
 export function OrderModal({ open, onClose, items }: Props) {
-  const [step, setStep] = useState<'customer' | 'location' | 'review' | 'invoice'>('customer');
+  const [step, setStep] = useState<'customer' | 'method' | 'location' | 'review' | 'invoice'>('customer');
   const [customer, setCustomer] = useState<CustomerDetails>(defaultCustomer);
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('courier');
   const [delivery, setDelivery] = useState<DeliveryLocation>(defaultLocation);
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [invoiceVerification, setInvoiceVerification] = useState<{
@@ -64,13 +64,14 @@ export function OrderModal({ open, onClose, items }: Props) {
     () => items.reduce((sum, item) => sum + calculateLineTotal(item.price, item.quantity), 0),
     [items],
   );
-  const deliveryCharges = subtotal > 0 ? 30 : 0;
+  const isPuneDelivery = customer.city.trim().toLowerCase().includes('pune') || customer.pincode.trim().startsWith('411');
+  const deliveryCharges = subtotal > 0 && deliveryMethod === 'courier' ? (isPuneDelivery ? 30 : 40) : 0;
   const discount = 0;
   const grandTotal = subtotal + deliveryCharges - discount;
 
   const handleCustomerSubmit = (values: CustomerDetails) => {
     setCustomer(values);
-    setStep('location');
+    setStep('method');
   };
 
   const handleGenerateBill = async () => {
@@ -85,6 +86,7 @@ export function OrderModal({ open, onClose, items }: Props) {
         issuedAt: new Date().toLocaleDateString(),
         customer,
         delivery,
+        deliveryMethod,
         items,
         subtotal,
         deliveryCharges,
@@ -94,6 +96,12 @@ export function OrderModal({ open, onClose, items }: Props) {
 
       let pdfBlob = await generateInvoicePdf(invoiceData);
       let file = new File([pdfBlob], `${invoiceNumber}.pdf`, { type: 'application/pdf' });
+
+      const fileSizeMb = Number((pdfBlob.size / 1024 / 1024).toFixed(2));
+      console.log(`[Invoice] Final PDF size: ${fileSizeMb.toFixed(2)} MB`);
+      if (pdfBlob.size > 9 * 1024 * 1024) {
+        throw new Error('Invoice file is too large. Please contact support.');
+      }
 
       if (!validatePdf(file)) {
         console.warn('[Cloudinary] Generated PDF failed validation, regenerating.');
@@ -142,6 +150,8 @@ export function OrderModal({ open, onClose, items }: Props) {
       `Address: ${[customer.houseNumber, customer.street, customer.area, customer.city, customer.state, customer.pincode].filter(Boolean).join(', ')}`,
       `OpenStreetMap Location: ${delivery.address} (${delivery.latitude.toFixed(6)}, ${delivery.longitude.toFixed(6)})`,
       `Google Maps Link: ${delivery.googleMapsUrl ?? 'https://www.google.com/maps?q=' + delivery.latitude + ',' + delivery.longitude}`,
+      `Delivery Method: ${deliveryMethod === 'porter' ? 'Porter (charges paid separately by customer)' : `Courier (${isPuneDelivery ? 'Pune' : 'Outside Pune'})`}`,
+      `Delivery Charge in Bill: ${formatCurrency(deliveryCharges)}`,
       'Products:',
       ...items.map(item => `${item.name} - ${item.quantity} kg - ${formatCurrency(calculateLineTotal(item.price, item.quantity))}`),
       `Grand Total: ${formatCurrency(grandTotal)}`,
@@ -224,13 +234,13 @@ export function OrderModal({ open, onClose, items }: Props) {
             </button>
           </div>
 
-          <div className="grid gap-5 p-3 sm:gap-6 sm:p-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <div className="space-y-6">
+          <div className="p-3 sm:p-6">
+            <div className="mx-auto max-w-4xl space-y-6">
               <div className="rounded-[24px] border border-[#E4D2B4] bg-white p-4 shadow-sm sm:p-5">
                 <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-                  {['customer', 'location', 'review', 'invoice'].map((label, index) => {
+                  {['customer', 'method', 'location', 'review', 'invoice'].map((label, index) => {
                     const isActive = step === label;
-                    const doneSteps = ['location', 'review', 'invoice'];
+                    const doneSteps = ['method', 'location', 'review', 'invoice'];
                     const isDone = doneSteps.includes(label) && doneSteps.indexOf(step) > index;
                     let className = 'bg-[#FFF9F0] text-[#8B5E3C]';
                     if (isActive) {
@@ -252,6 +262,48 @@ export function OrderModal({ open, onClose, items }: Props) {
                       <ArrowLeft size={16} /> <span className="font-semibold">Customer Information</span>
                     </div>
                     <CustomerForm defaultValues={customer} onSubmit={handleCustomerSubmit} />
+                  </div>
+                )}
+
+                {step === 'method' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-[#6B4226]">
+                      <ArrowLeft size={16} /> <span className="font-semibold">Delivery Method</span>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryMethod('courier')}
+                        className={`rounded-2xl border p-4 text-left transition ${deliveryMethod === 'courier' ? 'border-[#6B4226] bg-[#FFF3E8] ring-2 ring-[#6B4226]/15' : 'border-[#E4D2B4] bg-white hover:bg-[#FFF9F0]'}`}
+                      >
+                        <Package size={22} className="mb-3 text-[#6B4226]" />
+                        <p className="font-semibold text-[#6B4226]">Courier</p>
+                        <p className="mt-1 text-sm text-[#8B5E3C]">₹30 inside Pune, ₹40 outside Pune</p>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryMethod('porter')}
+                        className={`rounded-2xl border p-4 text-left transition ${deliveryMethod === 'porter' ? 'border-[#6B4226] bg-[#FFF3E8] ring-2 ring-[#6B4226]/15' : 'border-[#E4D2B4] bg-white hover:bg-[#FFF9F0]'}`}
+                      >
+                        <Truck size={22} className="mb-3 text-[#6B4226]" />
+                        <p className="font-semibold text-[#6B4226]">Porter</p>
+                        <p className="mt-1 text-sm text-[#8B5E3C]">₹0 added to this bill</p>
+                      </button>
+                    </div>
+                    {deliveryMethod === 'porter' && (
+                      <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                        <p className="font-semibold">Important Porter notice</p>
+                        <p className="mt-1">Porter charges are not included in this bill. The customer must pay Porter charges directly.</p>
+                      </div>
+                    )}
+                    {deliveryMethod === 'courier' && (
+                      <div className="rounded-2xl border border-[#E4D2B4] bg-[#FFF9F0] p-4 text-sm text-[#5A3822]">
+                        Courier charge: <strong>{formatCurrency(deliveryCharges)}</strong> ({isPuneDelivery ? 'inside Pune' : 'outside Pune'})
+                      </div>
+                    )}
+                    <button onClick={() => setStep('location')} className="w-full rounded-2xl bg-[#6B4226] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B5E3C]">
+                      Continue to Delivery Location
+                    </button>
                   </div>
                 )}
 
@@ -279,6 +331,8 @@ export function OrderModal({ open, onClose, items }: Props) {
                       <p>{[customer.houseNumber, customer.street, customer.area, customer.city, customer.state, customer.pincode].filter(Boolean).join(', ')}</p>
                       <p className="mt-2 mb-1 font-semibold text-[#6B4226]">Location</p>
                       <p>{delivery.address}</p>
+                      <p className="mt-2 mb-1 font-semibold text-[#6B4226]">Delivery Method</p>
+                      <p>{deliveryMethod === 'porter' ? 'Porter — customer pays Porter separately' : `Courier — ${formatCurrency(deliveryCharges)}`}</p>
                     </div>
                     {isGenerating && <LoadingScreen title="Preparing your invoice" subtitle="Crafting a premium bill for your order." />}
                     {isUploading && (
@@ -337,9 +391,6 @@ export function OrderModal({ open, onClose, items }: Props) {
               </div>
             </div>
 
-            <div className="space-y-4">
-              <OrderSummary items={items} customer={customer} delivery={delivery} subtotal={subtotal} deliveryCharges={deliveryCharges} discount={discount} grandTotal={grandTotal} />
-            </div>
           </div>
         </motion.div>
       </motion.div>

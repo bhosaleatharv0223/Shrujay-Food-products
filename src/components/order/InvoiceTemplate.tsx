@@ -81,6 +81,7 @@ export function InvoiceTemplate({ data, amountInWords }: Props) {
             <div className="flex justify-between gap-4"><span className="text-[#6B4226]">Date</span><span>{data.issuedAt}</span></div>
             <div className="flex justify-between gap-4"><span className="text-[#6B4226]">Order No</span><span>{data.orderNumber}</span></div>
             <div className="flex justify-between gap-4"><span className="text-[#6B4226]">Payment Mode</span><span>{data.paymentMode}</span></div>
+            <div className="flex justify-between gap-4"><span className="text-[#6B4226]">Delivery Method</span><span className="capitalize">{data.deliveryMethod}</span></div>
           </div>
         </div>
       </div>
@@ -115,7 +116,10 @@ export function InvoiceTemplate({ data, amountInWords }: Props) {
       <div className="mt-8 flex flex-col gap-4 lg:items-end">
         <div className="w-full max-w-[420px] rounded-[24px] border border-[#E4D2B4] bg-[#FFF8EF] p-6 text-sm text-[#3A2D24]">
           <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency(data.subtotal)}</span></div>
-          <div className="mt-3 flex justify-between"><span>Delivery Charge</span><span>{formatCurrency(data.deliveryCharges)}</span></div>
+          <div className="mt-3 flex justify-between"><span>Delivery Charge ({data.deliveryMethod === 'porter' ? 'Porter' : 'Courier'})</span><span>{formatCurrency(data.deliveryCharges)}</span></div>
+          {data.deliveryMethod === 'porter' && (
+            <div className="mt-3 rounded-xl bg-[#FFF3D6] p-3 text-xs text-[#6B4226]">Porter charges are not included. Customer pays Porter directly.</div>
+          )}
         </div>
         <div className="w-full max-w-[420px] rounded-[24px] bg-[#FCF5E7] p-6 text-sm font-semibold text-[#3A2D24] shadow-sm">
           <div className="flex justify-between"><span>Total</span><span>{formatCurrency(data.grandTotal)}</span></div>
