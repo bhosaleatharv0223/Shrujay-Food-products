@@ -204,6 +204,7 @@ function Nav({ page, setPage, cartCount, openCart }: { page: Page; setPage: (p: 
 // ─── Footer ────────────────────────────────────────────────────────────────
 function Footer({ setPage }: { setPage: (p: Page) => void }) {
   const go = (p: Page) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  
   const navLinks: { label: string; p: Page }[] = [
     { label: "Home", p: "home" },
     { label: "Products", p: "products" },
@@ -325,8 +326,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 // ─── Product Card ──────────────────────────────────────────────────────────
-function ProductCard({ product, setPage, addToCart }: { product: Product; setPage: (p: Page) => void; addToCart: (product: Product) => void }) {
-  const go = () => { setPage("product-detail"); window.scrollTo({ top: 0, behavior: "smooth" }); };
+function ProductCard({ product, addToCart, openCart }: { product: Product; addToCart: (product: Product) => void; openCart: () => void }) {
   return (
     <div className="bg-white rounded-[14px] overflow-hidden border border-[#DB9C23]/10 shadow-sm hover:shadow-[0_8px_32px_rgba(46,125,50,0.14)] transition-all duration-300 group flex flex-col">
       <div className="relative overflow-hidden bg-[#F5EDD8] h-44 sm:h-48">
@@ -344,12 +344,12 @@ function ProductCard({ product, setPage, addToCart }: { product: Product; setPag
         <h3 className="font-bold text-[#DB9C23] text-[15px] leading-snug">{product.name}</h3>
         <p className="text-[#D4A017] text-[12px] font-semibold mb-1">{product.marathi}</p>
         <p className="text-[#6D4C41] text-[13px] leading-relaxed flex-1 line-clamp-2">{product.desc}</p>
-        <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-2 mt-3">
-          <button onClick={go} className="py-2 border-2 border-[#DB9C23] text-[#DB9C23] text-[12px] font-bold rounded-xl hover:bg-[#FFF8EC] transition-all duration-200">
-            View Details
-          </button>
-          <button onClick={() => addToCart(product)} className="py-2 bg-[#DB9C23] text-white text-[12px] font-bold rounded-xl hover:bg-[#174C2C] transition-all duration-200 flex items-center justify-center gap-1.5">
+        <div className="flex flex-col gap-2 mt-3">
+          <button onClick={() => addToCart(product)} className="w-full py-2 bg-[#DB9C23] text-white text-[12px] font-bold rounded-xl hover:bg-[#174C2C] transition-all duration-200 flex items-center justify-center gap-1.5">
             <ShoppingCart size={13} /> Add to Cart
+          </button>
+          <button onClick={openCart} className="w-full py-2 border-2 border-[#DB9C23] text-[#DB9C23] text-[12px] font-bold rounded-xl hover:bg-[#FFF8EC] transition-all duration-200 flex items-center justify-center gap-1.5">
+            <ShoppingCart size={13} /> View Cart
           </button>
         </div>
       </div>
@@ -442,19 +442,76 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
     };
   }, []);
 
+  // --- marquee auto-scroll state & controls ---
+  const autoScrollPausedRef = useRef(false);
+  const resumeTimerRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number | null>(null);
+  const speedDurationMs = 40000; // full loop duration (ms)
+
+  function pauseAutoScrollFor(ms = 2500) {
+    autoScrollPausedRef.current = true;
+    if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = window.setTimeout(() => {
+      autoScrollPausedRef.current = false;
+      lastTimeRef.current = null;
+    }, ms) as unknown as number;
+  }
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    let rafId = 0;
+
+    const onPointerDown = () => pauseAutoScrollFor(2500);
+    const onPointerEnter = () => pauseAutoScrollFor(2500);
+    const onPointerUp = () => pauseAutoScrollFor(2500);
+
+    el.addEventListener('pointerdown', onPointerDown, { passive: true });
+    el.addEventListener('pointerup', onPointerUp, { passive: true });
+    el.addEventListener('pointerenter', onPointerEnter);
+    el.addEventListener('pointerleave', onPointerUp);
+
+    const tick = (time: number) => {
+      try {
+        if (!lastTimeRef.current) lastTimeRef.current = time;
+        const dt = time - (lastTimeRef.current || time);
+        lastTimeRef.current = time;
+
+        const totalW = el.scrollWidth;
+        const singleSetW = totalW / 2 || 0;
+        if (!autoScrollPausedRef.current && singleSetW > 0) {
+          const speedPxPerMs = singleSetW / speedDurationMs;
+          el.scrollLeft = (el.scrollLeft + speedPxPerMs * dt);
+          if (el.scrollLeft >= singleSetW) {
+            el.scrollLeft -= singleSetW;
+          }
+        }
+      } catch (e) {}
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      el.removeEventListener('pointerdown', onPointerDown);
+      el.removeEventListener('pointerup', onPointerUp);
+      el.removeEventListener('pointerenter', onPointerEnter);
+      el.removeEventListener('pointerleave', onPointerUp);
+      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+    };
+  }, []);
   const scroll = (direction: "left" | "right") => {
     if (!containerRef.current) return;
     const { clientWidth } = containerRef.current;
     const scrollAmount = direction === "left" ? -clientWidth * 0.7 : clientWidth * 0.7;
     containerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
   };
-
   const totalDots = 5;
   const activeDotIndex = Math.min(
     Math.round(scrollProgress * (totalDots - 1)),
     totalDots - 1
   );
-
   const handleDotClick = (index: number) => {
     if (!containerRef.current) return;
     const { scrollWidth, clientWidth } = containerRef.current;
@@ -487,79 +544,65 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
 
         {/* Carousel Wrapper */}
         <div className="relative px-1 md:px-6">
-          {/* Scroll Container */}
-          <div
-            ref={containerRef}
-            className="flex gap-2.5 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide py-2 px-0.5"
-          >
-            {ALL_PRODUCTS.map(product => (
+          {/* Marquee-style Track (hero) */}
+          <div className="relative w-full overflow-hidden max-w-full box-border">
               <div
-                key={product.id}
-                className="relative pt-1 pb-4 flex-shrink-0 snap-start select-none w-[100px] sm:w-[115px] md:w-[125px] group"
+                ref={containerRef}
+                className="marquee-track flex gap-3 sm:gap-4 items-stretch whitespace-nowrap will-change-transform overflow-x-auto scrollbar-hide"
+                style={{ WebkitOverflowScrolling: 'touch' }}
               >
-                {/* Background Golden Shape */}
-                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 w-[85%] h-8 bg-[#D4A017] rounded-b-[14px] rounded-t-[2px] opacity-90 shadow-sm -z-10 transition-all duration-300 group-hover:translate-y-1 group-hover:scale-95 pointer-events-none" />
+              {Array.from({ length: 2 }).map((_, setIdx) =>
+                ALL_PRODUCTS.map((product) => (
+                  <div
+                    key={`${setIdx}-${product.id}`}
+                    className="relative flex-shrink-0 select-none w-[160px] sm:w-[200px] md:w-[240px] lg:w-[280px] xl:w-[320px] group"
+                  >
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[85%] h-10 bg-[#D4A017] rounded-b-[14px] rounded-t-[2px] opacity-90 -z-10 pointer-events-none" />
 
-                {/* Main Card */}
-                <div
-                  onClick={() => go("product-detail")}
-                  className="bg-white/95 backdrop-blur-sm rounded-[12px] overflow-hidden border border-[#DB9C23]/30 shadow-md hover:shadow-[0_8px_24px_rgba(219,156,35,0.30)] hover:border-[#D4A017] transition-all duration-300 transform hover:-translate-y-1.5 cursor-pointer flex flex-col h-full"
-                >
-                  {/* Product Image */}
-                  <div className="relative aspect-square overflow-hidden bg-[#FFF8EC]">
-                    <img
-                      src={product.img}
-                      alt={product.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    {/* Price tag badge — amber to match hero */}
-                    <div className="absolute top-1.5 right-1.5">
-                      <span className="bg-[#DB9C23] text-white text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow">
-                        {product.price}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Details */}
-                  <div className="p-2 flex flex-col justify-between flex-grow text-center">
-                    <div>
-                      <h3 className="font-extrabold text-[#DB9C23] text-[10.5px] sm:text-[11.5px] leading-tight line-clamp-1">
-                        {product.name}
-                      </h3>
-                      <p className="text-[#6D4C41] text-[9px] sm:text-[10px] font-semibold mt-0.5">
-                        {product.marathi}
-                      </p>
-                    </div>
-                    <button
-                      onClick={(event) => { event.stopPropagation(); addToCart(product); }}
-                      className="mt-1.5 py-1 rounded-lg bg-[#DB9C23] text-white text-[8px] sm:text-[9px] font-bold flex items-center justify-center gap-1 hover:bg-[#174C2C] transition-colors"
+                    <div
+                      onClick={() => go("product-detail")}
+                      className="bg-white/95 backdrop-blur-sm rounded-[12px] overflow-hidden border border-[#DB9C23]/30 shadow-md hover:shadow-[0_8px_24px_rgba(219,156,35,0.30)] hover:border-[#D4A017] transition-all duration-300 transform hover:-translate-y-1.5 cursor-pointer flex flex-col h-full"
                     >
-                      <Plus size={9} /> Cart
-                    </button>
+                      <div className="relative overflow-hidden bg-[#FFF8EC] h-36 sm:h-44 md:h-48">
+                        <img src={product.img} alt={product.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div className="absolute top-2 right-2">
+                          <span className="bg-[#DB9C23] text-white text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow">{product.price}</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3 flex flex-col justify-between flex-grow text-center">
+                        <div>
+                          <h3 className="font-extrabold text-[#DB9C23] text-sm md:text-[15px] leading-tight line-clamp-1">{product.name}</h3>
+                          <p className="text-[#6D4C41] text-[12px] font-semibold mt-0.5">{product.marathi}</p>
+                        </div>
+                        <button onClick={(event) => { event.stopPropagation(); addToCart(product); }} className="mt-2 py-2 rounded-lg bg-[#DB9C23] text-white text-[12px] font-bold flex items-center justify-center gap-2 hover:bg-[#174C2C] transition-colors">
+                          <Plus size={11} /> Cart
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                ))
+              )}
+            </div>
+
+            {/* Left Arrow Button */}
+            <button
+              onClick={() => { pauseAutoScrollFor(2500); scroll("left"); }}
+              className="absolute -left-2 md:-left-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-9 md:h-9 bg-white/90 rounded-full border border-[#DB9C23] flex items-center justify-center text-[#DB9C23] hover:bg-[#DB9C23] hover:border-[#D4A017] hover:text-white shadow-md transition-all duration-200 focus:outline-none"
+              aria-label="Previous Products"
+            >
+              <ChevronLeft size={16} className="stroke-[2.5]" />
+            </button>
+
+            {/* Right Arrow Button */}
+            <button
+              onClick={() => { pauseAutoScrollFor(2500); scroll("right"); }}
+              className="absolute -right-2 md:-right-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-9 md:h-9 bg-white/90 rounded-full border border-[#DB9C23] flex items-center justify-center text-[#DB9C23] hover:bg-[#DB9C23] hover:border-[#D4A017] hover:text-white shadow-md transition-all duration-200 focus:outline-none"
+              aria-label="Next Products"
+            >
+              <ChevronRight size={16} className="stroke-[2.5]" />
+            </button>
           </div>
-
-          {/* Left Arrow Button */}
-          <button
-            onClick={() => scroll("left")}
-            className="absolute -left-2 md:-left-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-9 md:h-9 bg-white/90 rounded-full border border-[#DB9C23] flex items-center justify-center text-[#DB9C23] hover:bg-[#DB9C23] hover:border-[#D4A017] hover:text-white shadow-md transition-all duration-200 focus:outline-none"
-            aria-label="Previous Products"
-          >
-            <ChevronLeft size={16} className="stroke-[2.5]" />
-          </button>
-
-          {/* Right Arrow Button */}
-          <button
-            onClick={() => scroll("right")}
-            className="absolute -right-2 md:-right-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-9 md:h-9 bg-white/90 rounded-full border border-[#DB9C23] flex items-center justify-center text-[#DB9C23] hover:bg-[#DB9C23] hover:border-[#D4A017] hover:text-white shadow-md transition-all duration-200 focus:outline-none"
-            aria-label="Next Products"
-          >
-            <ChevronRight size={16} className="stroke-[2.5]" />
-          </button>
         </div>
 
         {/* Scroll Dot Indicators */}
@@ -583,7 +626,7 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
   }
 
   return (
-    <section className="py-16 bg-[#FFF9F0] border-y border-[#DB9C23]/10 relative overflow-hidden">
+    <section id="products" className="py-16 bg-[#FFF9F0] border-y border-[#DB9C23]/10 relative overflow-hidden">
       {/* Decorative leaf motifs */}
       <div className="absolute top-6 left-6 opacity-[0.04] text-[#2E7D32] pointer-events-none hidden md:block">
         <Leaf size={100} />
@@ -608,79 +651,44 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
 
         {/* Carousel Wrapper */}
         <div className="relative px-2 md:px-8">
-          {/* Scroll Container */}
-          <div 
-            ref={containerRef}
-            className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide py-4 px-1"
-          >
-            {ALL_PRODUCTS.map(product => (
-              <div 
-                key={product.id} 
-                className="relative pt-2 pb-6 flex-shrink-0 snap-start select-none w-[calc((100%-16px)/2)] sm:w-[calc((100%-32px)/3)] md:w-[calc((100%-48px)/4)] lg:w-[calc((100%-72px)/6)] xl:w-[calc((100%-96px)/7)] group"
-              >
-                {/* Background Golden Highlight Category Shape */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[85%] h-12 bg-[#D4A017] rounded-b-[20px] rounded-t-[4px] opacity-90 shadow-sm -z-10 transition-all duration-300 group-hover:translate-y-1.5 group-hover:scale-95 pointer-events-none" />
+          <div className="relative w-full overflow-hidden max-w-full box-border">
+            <div ref={containerRef} className="marquee-track flex gap-4 items-stretch whitespace-nowrap will-change-transform overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+              {Array.from({ length: 2 }).map((_, setIdx) =>
+                ALL_PRODUCTS.map((product) => (
+                  <div key={`${setIdx}-${product.id}`} className="relative flex-shrink-0 select-none w-[220px] sm:w-[260px] md:w-[300px] lg:w-[340px] xl:w-[380px] group">
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[85%] h-12 bg-[#D4A017] rounded-b-[20px] rounded-t-[4px] opacity-90 -z-10 pointer-events-none" />
 
-                {/* Main Card */}
-                <div
-                  onClick={() => go("product-detail")}
-                  className="bg-white rounded-[16px] overflow-hidden border border-[#DB9C23]/12 shadow-sm hover:shadow-[0_12px_32px_rgba(46,125,50,0.16)] hover:border-[#D4A017] transition-all duration-300 transform hover:-translate-y-2 cursor-pointer flex flex-col h-full"
-                >
-                  {/* Product Image */}
-                  <div className="relative aspect-square overflow-hidden bg-[#FFF8EC]">
-                    <img
-                      src={product.img}
-                      alt={product.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    {/* Price tag badge */}
-                    <div className="absolute top-2 right-2">
-                      <span className="bg-[#2E7D32] text-white text-[10px] md:text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow">
-                        {product.price}
-                      </span>
+                    <div onClick={() => go("product-detail")} className="bg-white rounded-[16px] overflow-hidden border border-[#DB9C23]/12 shadow-sm hover:shadow-[0_12px_32px_rgba(46,125,50,0.16)] hover:border-[#D4A017] transition-all duration-300 transform hover:-translate-y-2 cursor-pointer flex flex-col h-full">
+                      <div className="relative overflow-hidden bg-[#FFF8EC] h-44 sm:h-52 md:h-56">
+                        <img src={product.img} alt={product.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div className="absolute top-2 right-2">
+                          <span className="bg-[#2E7D32] text-white text-[10px] md:text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow">{product.price}</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3 flex flex-col justify-between flex-grow text-center">
+                        <div>
+                          <h3 className="font-extrabold text-[#2E7D32] text-base md:text-lg leading-tight line-clamp-1">{product.name}</h3>
+                          <p className="text-[#6D4C41] text-sm md:text-[14px] font-semibold mt-1">{product.marathi}</p>
+                        </div>
+                        <button onClick={(event) => { event.stopPropagation(); addToCart(product); }} className="mt-3 px-3 py-2 rounded-lg bg-[#2E7D32] text-white text-sm md:text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-[#DB9C23] transition-colors">
+                          <Plus size={12} /> Add to Cart
+                        </button>
+                      </div>
                     </div>
                   </div>
+                ))
+              )}
+            </div>
 
-                  {/* Details */}
-                  <div className="p-3 flex flex-col justify-between flex-grow text-center">
-                    <div>
-                      <h3 className="font-extrabold text-[#2E7D32] text-[13px] md:text-[14px] leading-tight line-clamp-1">
-                        {product.name}
-                      </h3>
-                      <p className="text-[#6D4C41] text-[11px] font-semibold mt-0.5">
-                        {product.marathi}
-                      </p>
-                    </div>
-                    <button
-                      onClick={(event) => { event.stopPropagation(); addToCart(product); }}
-                      className="mt-2 py-1.5 rounded-lg bg-[#2E7D32] text-white text-[10px] font-bold flex items-center justify-center gap-1 hover:bg-[#DB9C23] transition-colors"
-                    >
-                      <Plus size={11} /> Add to Cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <button onClick={() => { pauseAutoScrollFor(2500); scroll("left"); }} className="absolute -left-1 md:left-0 top-1/2 -translate-y-1/2 z-20 w-11 h-11 md:w-12 md:h-12 bg-white rounded-full border-2 border-[#2E7D32] flex items-center justify-center text-[#2E7D32] hover:bg-[#D4A017] hover:border-[#D4A017] hover:text-white shadow-lg transition-all duration-200 focus:outline-none" aria-label="Previous Products">
+              <ChevronLeft size={20} className="stroke-[2.5]" />
+            </button>
+
+            <button onClick={() => { pauseAutoScrollFor(2500); scroll("right"); }} className="absolute -right-1 md:right-0 top-1/2 -translate-y-1/2 z-20 w-11 h-11 md:w-12 md:h-12 bg-white rounded-full border-2 border-[#2E7D32] flex items-center justify-center text-[#2E7D32] hover:bg-[#D4A017] hover:border-[#D4A017] hover:text-white shadow-lg transition-all duration-200 focus:outline-none" aria-label="Next Products">
+              <ChevronRight size={20} className="stroke-[2.5]" />
+            </button>
           </div>
-
-          {/* Left Arrow Button */}
-          <button 
-            onClick={() => scroll("left")}
-            className="absolute -left-1 md:left-0 top-1/2 -translate-y-1/2 z-20 w-11 h-11 md:w-12 md:h-12 bg-white rounded-full border-2 border-[#2E7D32] flex items-center justify-center text-[#2E7D32] hover:bg-[#D4A017] hover:border-[#D4A017] hover:text-white shadow-lg transition-all duration-200 focus:outline-none"
-            aria-label="Previous Products"
-          >
-            <ChevronLeft size={20} className="stroke-[2.5]" />
-          </button>
-
-          {/* Right Arrow Button */}
-          <button 
-            onClick={() => scroll("right")}
-            className="absolute -right-1 md:right-0 top-1/2 -translate-y-1/2 z-20 w-11 h-11 md:w-12 md:h-12 bg-white rounded-full border-2 border-[#2E7D32] flex items-center justify-center text-[#2E7D32] hover:bg-[#D4A017] hover:border-[#D4A017] hover:text-white shadow-lg transition-all duration-200 focus:outline-none"
-            aria-label="Next Products"
-          >
-            <ChevronRight size={20} className="stroke-[2.5]" />
-          </button>
         </div>
 
         {/* Scroll Dot Indicators */}
@@ -710,8 +718,31 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
 }
 
 // ─── HOME PAGE ─────────────────────────────────────────────────────────────
-function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCart: (product: Product) => void }) {
+function HomePage({ setPage, addToCart, openCart }: { setPage: (p: Page) => void; addToCart: (product: Product) => void; openCart: () => void }) {
   const go = (p: Page) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  // Hero CTA scroll handlers (local to HomePage)
+  function handleViewProducts() {
+    const el = document.getElementById("products");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    go("products");
+  }
+
+  function handleContact() {
+    const contactEl = document.getElementById("contact") || document.getElementById("contact-us");
+    if (contactEl) {
+      contactEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    go("contact");
+  }
+
+  // Provide handleContactUs alias to match expected handler name
+  function handleContactUs() {
+    return handleContact();
+  }
   const [heroImageIndex, setHeroImageIndex] = useState(0);
 
   useEffect(() => {
@@ -804,13 +835,18 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
             </p>
 
             <div className="flex flex-col gap-3 sm:gap-6 mb-4 sm:mb-8">
-              <div className="order-2 lg:order-1 hero-cta grid w-full grid-cols-1 gap-3 min-[420px]:flex min-[420px]:w-auto min-[420px]:flex-wrap">
-                <button onClick={() => go("products")}
-                  className="px-7 py-3 bg-[#DB9C23] text-white font-bold rounded-full hover:bg-[#C17F1A] transition-all duration-200 shadow-[0_10px_28px_rgba(0,0,0,0.22)] flex items-center justify-center gap-2 text-[14px]">
+              <div className="flex flex-col w-full gap-3 sm:flex-row sm:w-auto sm:gap-4 relative z-30">
+                <button
+                  onClick={handleViewProducts}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#F8B400] text-black font-bold uppercase tracking-wide px-6 py-3.5 rounded-full hover:bg-[#e0a300] transition-colors"
+                >
                   View Products <ArrowRight size={14} />
                 </button>
-                <button onClick={() => go("contact")}
-                  className="px-7 py-3 bg-white/12 border border-white/35 text-white font-bold rounded-full hover:bg-white hover:text-[#DB9C23] transition-all duration-200 text-[14px] backdrop-blur-sm shadow-[0_10px_28px_rgba(0,0,0,0.18)]">
+
+                <button
+                  onClick={handleContactUs}
+                  className="w-full sm:w-auto flex items-center justify-center border border-white/60 text-white font-semibold px-6 py-3.5 rounded-full hover:bg-white/10 transition-colors"
+                >
                   Contact Us
                 </button>
               </div>
@@ -843,7 +879,7 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {ALL_PRODUCTS.slice(0, 4).map(p => <ProductCard key={p.id} product={p} setPage={setPage} addToCart={addToCart} />)}
+            {ALL_PRODUCTS.slice(0, 4).map(p => <ProductCard key={p.id} product={p} addToCart={addToCart} openCart={openCart} />)}
           </div>
           <div className="text-center mt-10">
             <button onClick={() => go("products")}
@@ -929,7 +965,7 @@ function HomePage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCar
 }
 
 // ─── PRODUCTS PAGE ─────────────────────────────────────────────────────────
-function ProductsPage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCart: (product: Product) => void }) {
+function ProductsPage({ setPage, addToCart, openCart }: { setPage: (p: Page) => void; addToCart: (product: Product) => void; openCart: () => void }) {
   const categories = ["All", "Dal & Pulses", "Pulses", "Grains", "Festive Foods", "Flours"];
   const [active, setActive] = useState("All");
   const filtered = active === "All" ? ALL_PRODUCTS : ALL_PRODUCTS.filter(p => p.category === active);
@@ -968,7 +1004,7 @@ function ProductsPage({ setPage, addToCart }: { setPage: (p: Page) => void; addT
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <p className="text-[#6D4C41] text-[13px] mb-6 font-medium">{filtered.length} product{filtered.length !== 1 ? "s" : ""} shown</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filtered.map(p => <ProductCard key={p.id} product={p} setPage={setPage} addToCart={addToCart} />)}
+          {filtered.map(p => <ProductCard key={p.id} product={p} addToCart={addToCart} openCart={openCart} />)}
         </div>
       </div>
 
@@ -1288,7 +1324,7 @@ function ContactPage() {
   ];
 
   return (
-    <div className="pt-[64px] lg:pt-[80px] min-h-screen bg-white">
+    <div id="contact" className="pt-[64px] lg:pt-[80px] min-h-screen bg-white">
       {/* Header */}
       <div className="bg-[#DB9C23] py-12 sm:py-16 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.05]"
@@ -1524,7 +1560,6 @@ export default function App() {
       }
       return [...current, { product, quantity: MIN_QUANTITY_KG }];
     });
-    setCartOpen(true);
   };
 
   const changeQuantity = (productId: number, quantity: number) => {
@@ -1552,8 +1587,8 @@ export default function App() {
     <div className="min-h-screen bg-[#FFF8EC] font-[Mukta,sans-serif]">
       <Nav page={page} setPage={setPage} cartCount={cartCount} openCart={() => setCartOpen(true)} />
       <main>
-        {page === "home"           && <HomePage setPage={setPage} addToCart={addToCart} />}
-        {page === "products"       && <ProductsPage setPage={setPage} addToCart={addToCart} />}
+        {page === "home"           && <HomePage setPage={setPage} addToCart={addToCart} openCart={() => setCartOpen(true)} />}
+        {page === "products"       && <ProductsPage setPage={setPage} addToCart={addToCart} openCart={() => setCartOpen(true)} />}
         {page === "product-detail" && <ProductDetailPage setPage={setPage} addToCart={addToCart} />}
         {page === "about"          && <AboutPage />}
         {page === "contact"        && <ContactPage />}

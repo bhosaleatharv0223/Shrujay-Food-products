@@ -2,7 +2,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, Package, Truck, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CustomerForm } from './CustomerForm';
-import { LocationPicker } from './LocationPicker';
 import { GenerateBillButton } from './GenerateBillButton';
 import { InvoicePreview } from './InvoicePreview';
 import { ContinueWhatsAppButton } from './ContinueWhatsAppButton';
@@ -33,18 +32,26 @@ const defaultCustomer: CustomerDetails = {
   instructions: '',
 };
 
-const defaultLocation: DeliveryLocation = {
-  address: 'Please select a delivery location',
-  latitude: 18.52043,
-  longitude: 73.856743,
-  googleMapsUrl: 'https://www.google.com/maps?q=18.52043,73.856743',
+const buildDeliveryLocation = (customer: CustomerDetails): DeliveryLocation => {
+  const address = [customer.houseNumber, customer.street, customer.area, customer.city, customer.state, customer.pincode]
+    .filter(Boolean)
+    .join(', ');
+
+  return {
+    address: address || 'Customer address provided in checkout',
+    latitude: 18.52043,
+    longitude: 73.856743,
+    googleMapsUrl: 'https://www.google.com/maps?q=18.52043,73.856743',
+  };
 };
 
+const getCourierRatePerKg = (isPuneDelivery: boolean) => isPuneDelivery ? 30 : 40;
+const calculateCourierCharge = (totalWeightKg: number, isPuneDelivery: boolean) => totalWeightKg * getCourierRatePerKg(isPuneDelivery);
+
 export function OrderModal({ open, onClose, items }: Props) {
-  const [step, setStep] = useState<'customer' | 'method' | 'location' | 'review' | 'invoice'>('customer');
+  const [step, setStep] = useState<'customer' | 'method' | 'review' | 'invoice'>('customer');
   const [customer, setCustomer] = useState<CustomerDetails>(defaultCustomer);
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('courier');
-  const [delivery, setDelivery] = useState<DeliveryLocation>(defaultLocation);
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [invoiceVerification, setInvoiceVerification] = useState<{
     verified: boolean;
@@ -64,8 +71,14 @@ export function OrderModal({ open, onClose, items }: Props) {
     () => items.reduce((sum, item) => sum + calculateLineTotal(item.price, item.quantity), 0),
     [items],
   );
+  const totalWeightKg = useMemo(
+    () => items.reduce((sum, item) => sum + item.quantity, 0),
+    [items],
+  );
+  const delivery = useMemo(() => buildDeliveryLocation(customer), [customer]);
   const isPuneDelivery = customer.city.trim().toLowerCase().includes('pune') || customer.pincode.trim().startsWith('411');
-  const deliveryCharges = subtotal > 0 && deliveryMethod === 'courier' ? (isPuneDelivery ? 30 : 40) : 0;
+  const courierRatePerKg = getCourierRatePerKg(isPuneDelivery);
+  const deliveryCharges = subtotal > 0 && deliveryMethod === 'courier' ? calculateCourierCharge(totalWeightKg, isPuneDelivery) : 0;
   const discount = 0;
   const grandTotal = subtotal + deliveryCharges - discount;
 
@@ -126,7 +139,10 @@ export function OrderModal({ open, onClose, items }: Props) {
         return;
       }
 
-      window.open(cloudinaryUrl, '_blank', 'noopener,noreferrer');
+      // Do NOT automatically open the Cloudinary URL in a new tab —
+      // keep the user on the current page and let them choose to open or download.
+      // The invoice URL is stored in `invoice.cloudinaryUrl` and the UI shows
+      // buttons for download / WhatsApp sharing which will open the link when used.
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
@@ -151,7 +167,7 @@ export function OrderModal({ open, onClose, items }: Props) {
       `OpenStreetMap Location: ${delivery.address} (${delivery.latitude.toFixed(6)}, ${delivery.longitude.toFixed(6)})`,
       `Google Maps Link: ${delivery.googleMapsUrl ?? 'https://www.google.com/maps?q=' + delivery.latitude + ',' + delivery.longitude}`,
       `Delivery Method: ${deliveryMethod === 'porter' ? 'Porter (charges paid separately by customer)' : `Courier (${isPuneDelivery ? 'Pune' : 'Outside Pune'})`}`,
-      `Delivery Charge in Bill: ${formatCurrency(deliveryCharges)}`,
+      `Delivery Charge in Bill: ${formatCurrency(deliveryCharges)}${deliveryMethod === 'courier' ? ` (${totalWeightKg} kg x ${formatCurrency(courierRatePerKg)}/kg)` : ''}`,
       'Products:',
       ...items.map(item => `${item.name} - ${item.quantity} kg - ${formatCurrency(calculateLineTotal(item.price, item.quantity))}`),
       `Grand Total: ${formatCurrency(grandTotal)}`,
@@ -238,9 +254,9 @@ export function OrderModal({ open, onClose, items }: Props) {
             <div className="mx-auto max-w-4xl space-y-6">
               <div className="rounded-[24px] border border-[#E4D2B4] bg-white p-4 shadow-sm sm:p-5">
                 <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-                  {['customer', 'method', 'location', 'review', 'invoice'].map((label, index) => {
+                  {['customer', 'method', 'review', 'invoice'].map((label, index) => {
                     const isActive = step === label;
-                    const doneSteps = ['method', 'location', 'review', 'invoice'];
+                    const doneSteps = ['method', 'review', 'invoice'];
                     const isDone = doneSteps.includes(label) && doneSteps.indexOf(step) > index;
                     let className = 'bg-[#FFF9F0] text-[#8B5E3C]';
                     if (isActive) {
@@ -278,7 +294,7 @@ export function OrderModal({ open, onClose, items }: Props) {
                       >
                         <Package size={22} className="mb-3 text-[#6B4226]" />
                         <p className="font-semibold text-[#6B4226]">Courier</p>
-                        <p className="mt-1 text-sm text-[#8B5E3C]">₹30 inside Pune, ₹40 outside Pune</p>
+                        <p className="mt-1 text-sm text-[#8B5E3C]">{formatCurrency(30)}/kg inside Pune, {formatCurrency(40)}/kg outside Pune</p>
                       </button>
                       <button
                         type="button"
@@ -287,7 +303,7 @@ export function OrderModal({ open, onClose, items }: Props) {
                       >
                         <Truck size={22} className="mb-3 text-[#6B4226]" />
                         <p className="font-semibold text-[#6B4226]">Porter</p>
-                        <p className="mt-1 text-sm text-[#8B5E3C]">₹0 added to this bill</p>
+                        <p className="mt-1 text-sm text-[#8B5E3C]">{formatCurrency(0)} added to this bill</p>
                       </button>
                     </div>
                     {deliveryMethod === 'porter' && (
@@ -298,27 +314,14 @@ export function OrderModal({ open, onClose, items }: Props) {
                     )}
                     {deliveryMethod === 'courier' && (
                       <div className="rounded-2xl border border-[#E4D2B4] bg-[#FFF9F0] p-4 text-sm text-[#5A3822]">
-                        Courier charge: <strong>{formatCurrency(deliveryCharges)}</strong> ({isPuneDelivery ? 'inside Pune' : 'outside Pune'})
+                        Courier charge: <strong>{formatCurrency(deliveryCharges)}</strong> ({totalWeightKg} kg x {formatCurrency(courierRatePerKg)}/kg, {isPuneDelivery ? 'inside Pune' : 'outside Pune'})
                       </div>
                     )}
-                    <button onClick={() => setStep('location')} className="w-full rounded-2xl bg-[#6B4226] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B5E3C]">
-                      Continue to Delivery Location
-                    </button>
-                  </div>
-                )}
-
-                {step === 'location' && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-[#6B4226]">
-                      <ArrowLeft size={16} /> <span className="font-semibold">Delivery Location</span>
-                    </div>
-                    <LocationPicker value={delivery} onChange={setDelivery} />
                     <button onClick={() => setStep('review')} className="w-full rounded-2xl bg-[#6B4226] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B5E3C]">
                       Continue to Review
                     </button>
                   </div>
                 )}
-
                 {step === 'review' && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 text-[#6B4226]">
@@ -329,10 +332,8 @@ export function OrderModal({ open, onClose, items }: Props) {
                       <p>{customer.fullName}</p>
                       <p className="mt-2 mb-1 font-semibold text-[#6B4226]">Address</p>
                       <p>{[customer.houseNumber, customer.street, customer.area, customer.city, customer.state, customer.pincode].filter(Boolean).join(', ')}</p>
-                      <p className="mt-2 mb-1 font-semibold text-[#6B4226]">Location</p>
-                      <p>{delivery.address}</p>
                       <p className="mt-2 mb-1 font-semibold text-[#6B4226]">Delivery Method</p>
-                      <p>{deliveryMethod === 'porter' ? 'Porter — customer pays Porter separately' : `Courier — ${formatCurrency(deliveryCharges)}`}</p>
+                      <p>{deliveryMethod === 'porter' ? 'Porter - customer pays Porter separately' : `Courier - ${formatCurrency(deliveryCharges)} (${totalWeightKg} kg x ${formatCurrency(courierRatePerKg)}/kg)`}</p>
                     </div>
                     {isGenerating && <LoadingScreen title="Preparing your invoice" subtitle="Crafting a premium bill for your order." />}
                     {isUploading && (

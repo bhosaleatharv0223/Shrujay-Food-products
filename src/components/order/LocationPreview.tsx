@@ -14,13 +14,17 @@ export function LocationPreview({ address, latitude, longitude, googleMapsUrl }:
         <MapPin size={16} /> Current Address
       </div>
       <p className="mb-3 leading-6">{address}</p>
-      <div className="grid gap-2 text-xs sm:grid-cols-2">
-        <div><span className="font-semibold">Latitude:</span> {latitude.toFixed(6)}</div>
-        <div><span className="font-semibold">Longitude:</span> {longitude.toFixed(6)}</div>
-      </div>
-      <a href={googleMapsUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#E4D2B4] px-3 py-2 text-[#6B4226] transition hover:bg-[#FFF3E8]">
-        <ExternalLink size={14} /> Open Google Maps Link
-      </a>
+      {typeof latitude === 'number' && typeof longitude === 'number' ? (
+        <div className="grid gap-2 text-xs sm:grid-cols-2">
+          <div><span className="font-semibold">Latitude:</span> {latitude.toFixed(6)}</div>
+          <div><span className="font-semibold">Longitude:</span> {longitude.toFixed(6)}</div>
+        </div>
+      ) : null}
+      {googleMapsUrl ? (
+        <a href={googleMapsUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#E4D2B4] px-3 py-2 text-[#6B4226] transition hover:bg-[#FFF3E8]">
+          <ExternalLink size={14} /> Open Google Maps Link
+        </a>
+      ) : null}
     </div>
   );
 }

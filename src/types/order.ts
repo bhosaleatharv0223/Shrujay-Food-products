@@ -19,6 +19,10 @@ export type CustomerDetails = {
   state: string;
   pincode: string;
   instructions: string;
+  // Optional geolocation captured via LocationPicker or reverse-geocoding
+  latitude?: number;
+  longitude?: number;
+  googleMapsUrl?: string;
 };
 
 export type DeliveryLocation = {
