@@ -1,10 +1,10 @@
-import type { CustomerDetails, DeliveryLocation, DeliveryMethod, OrderItem } from '@/types/order';
+import type { CustomerDetails, DeliveryMethod, OrderItem } from '@/types/order';
 import { calculateLineTotal, formatCurrency } from '@/utils/pricing';
 
 type Props = {
   items: OrderItem[];
   customer: CustomerDetails;
-  delivery: DeliveryLocation;
+  delivery: string;
   deliveryMethod: DeliveryMethod;
   subtotal: number;
   deliveryCharges: number;

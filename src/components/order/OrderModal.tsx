@@ -10,7 +10,7 @@ import { SuccessDialog } from './SuccessDialog';
 import { generateInvoicePdf } from '@/services/billGenerator';
 import { uploadInvoiceToCloudinary, validatePdf, verifyCloudinaryPdf } from '@/services/cloudinary';
 import { buildWhatsAppUrl } from '@/services/whatsapp';
-import type { CustomerDetails, DeliveryLocation, DeliveryMethod, InvoiceData, OrderItem } from '@/types/order';
+import type { CustomerDetails, DeliveryMethod, InvoiceData, OrderItem } from '@/types/order';
 import { calculateLineTotal, formatCurrency } from '@/utils/pricing';
 
 type Props = {
@@ -32,37 +32,24 @@ const defaultCustomer: CustomerDetails = {
   instructions: '',
 };
 
-const buildDeliveryLocation = (customer: CustomerDetails): DeliveryLocation => {
+const buildDeliveryAddress = (customer: CustomerDetails): string => {
   const address = [customer.houseNumber, customer.street, customer.area, customer.city, customer.state, customer.pincode]
     .filter(Boolean)
     .join(', ');
 
-  return {
-    address: address || 'Customer address provided in checkout',
-    latitude: 18.52043,
-    longitude: 73.856743,
-    googleMapsUrl: 'https://www.google.com/maps?q=18.52043,73.856743',
-  };
+  return address || 'Customer address provided in checkout';
 };
 
 const getCourierRatePerKg = (isPuneDelivery: boolean) => isPuneDelivery ? 30 : 40;
 const calculateCourierCharge = (totalWeightKg: number, isPuneDelivery: boolean) => totalWeightKg * getCourierRatePerKg(isPuneDelivery);
 
 export function OrderModal({ open, onClose, items }: Props) {
-  const [step, setStep] = useState<'customer' | 'method' | 'review' | 'invoice'>('customer');
+  const [step, setStep] = useState<'customer' | 'method' | 'review' | 'confirmed'>('customer');
   const [customer, setCustomer] = useState<CustomerDetails>(defaultCustomer);
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('courier');
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
-  const [invoiceVerification, setInvoiceVerification] = useState<{
-    verified: boolean;
-    status: number;
-    contentType: string;
-    contentLength: number;
-    verifiedUrl: string;
-  } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isWhatsAppLoading, setIsWhatsAppLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +62,7 @@ export function OrderModal({ open, onClose, items }: Props) {
     () => items.reduce((sum, item) => sum + item.quantity, 0),
     [items],
   );
-  const delivery = useMemo(() => buildDeliveryLocation(customer), [customer]);
+  const deliveryAddress = useMemo(() => buildDeliveryAddress(customer), [customer]);
   const isPuneDelivery = customer.city.trim().toLowerCase().includes('pune') || customer.pincode.trim().startsWith('411');
   const courierRatePerKg = getCourierRatePerKg(isPuneDelivery);
   const deliveryCharges = subtotal > 0 && deliveryMethod === 'courier' ? calculateCourierCharge(totalWeightKg, isPuneDelivery) : 0;
@@ -98,7 +85,7 @@ export function OrderModal({ open, onClose, items }: Props) {
         paymentMode: 'Cash on Delivery',
         issuedAt: new Date().toLocaleDateString(),
         customer,
-        delivery,
+        delivery: deliveryAddress,
         deliveryMethod,
         items,
         subtotal,
@@ -127,22 +114,8 @@ export function OrderModal({ open, onClose, items }: Props) {
       const uploadResponse = await uploadInvoiceToCloudinary(file);
       setUploadProgress(100);
       const cloudinaryUrl = uploadResponse.secure_url;
-      const verification = await verifyCloudinaryPdf(uploadResponse.secure_url);
       setInvoice({ ...invoiceData, cloudinaryUrl });
-      setInvoiceVerification(verification);
-      setStep('invoice');
-
-      if (!verification.verified) {
-        setError(
-          `Invoice verification failed. Status ${verification.status}, Content-Type ${verification.contentType || 'unknown'}, Length ${verification.contentLength}.`
-        );
-        return;
-      }
-
-      // Do NOT automatically open the Cloudinary URL in a new tab —
-      // keep the user on the current page and let them choose to open or download.
-      // The invoice URL is stored in `invoice.cloudinaryUrl` and the UI shows
-      // buttons for download / WhatsApp sharing which will open the link when used.
+      setStep('confirmed');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
@@ -152,11 +125,6 @@ export function OrderModal({ open, onClose, items }: Props) {
   };
 
   const handleWhatsApp = () => {
-    if (!invoiceVerification?.verified) {
-      setError('Invoice must be verified before continuing to WhatsApp.');
-      return;
-    }
-
     setIsWhatsAppLoading(true);
     const message = [
       '━━━━━━━━━━━━━━',
@@ -164,8 +132,6 @@ export function OrderModal({ open, onClose, items }: Props) {
       `Customer Name: ${customer.fullName}`,
       `Phone Number: ${customer.mobile}`,
       `Address: ${[customer.houseNumber, customer.street, customer.area, customer.city, customer.state, customer.pincode].filter(Boolean).join(', ')}`,
-      `OpenStreetMap Location: ${delivery.address} (${delivery.latitude.toFixed(6)}, ${delivery.longitude.toFixed(6)})`,
-      `Google Maps Link: ${delivery.googleMapsUrl ?? 'https://www.google.com/maps?q=' + delivery.latitude + ',' + delivery.longitude}`,
       `Delivery Method: ${deliveryMethod === 'porter' ? 'Porter (charges paid separately by customer)' : `Courier (${isPuneDelivery ? 'Pune' : 'Outside Pune'})`}`,
       `Delivery Charge in Bill: ${formatCurrency(deliveryCharges)}${deliveryMethod === 'courier' ? ` (${totalWeightKg} kg x ${formatCurrency(courierRatePerKg)}/kg)` : ''}`,
       'Products:',
@@ -176,63 +142,13 @@ export function OrderModal({ open, onClose, items }: Props) {
     ].join('\n');
 
     const url = buildWhatsAppUrl(message);
-    window.open(url, '_blank', 'noopener,noreferrer');
+    const whatsappWindow = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!whatsappWindow) {
+      window.location.assign(url);
+    }
     setIsWhatsAppLoading(false);
+    onClose();
   };
-
-  const handleDownload = () => {
-    if (!invoice?.cloudinaryUrl) return;
-    window.open(invoice.cloudinaryUrl, '_blank', 'noopener,noreferrer');
-  };
-
-  const handleRetryVerification = async () => {
-    if (!invoice?.cloudinaryUrl) return;
-    setError(null);
-    setIsVerifying(true);
-
-    try {
-      const verification = await verifyCloudinaryPdf(invoice.cloudinaryUrl);
-      setInvoiceVerification(verification);
-      if (!verification.verified) {
-        setError(
-          `Invoice verification failed again. Status ${verification.status}, Content-Type ${verification.contentType || 'unknown'}.`
-        );
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Verification retry failed.');
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
-  const invoiceVerificationContent = (() => {
-    if (isVerifying) {
-      return <p className="text-[#6B4226]">Verifying uploaded invoice, please wait…</p>;
-    }
-
-    if (!invoiceVerification) {
-      return <p className="text-[#6B4226]">Invoice verification pending. Please verify before continuing.</p>;
-    }
-
-    if (invoiceVerification.verified) {
-      return (
-        <div className="space-y-2 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-          <p className="font-semibold">Verified PDF ready to send.</p>
-          <p>Content-Type: {invoiceVerification.contentType}</p>
-          <p>Content-Length: {invoiceVerification.contentLength}</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-2 rounded-2xl border border-[#F7D0D0] bg-[#FFF1F1] p-4 text-sm text-[#9B2C2C]">
-        <p className="font-semibold">Invoice verification failed.</p>
-        <p>Status: {invoiceVerification.status}</p>
-        <p>Content-Type: {invoiceVerification.contentType || 'unknown'}</p>
-        <p>Content-Length: {invoiceVerification.contentLength}</p>
-      </div>
-    );
-  })();
 
   if (!open) return null;
 
@@ -254,9 +170,9 @@ export function OrderModal({ open, onClose, items }: Props) {
             <div className="mx-auto max-w-4xl space-y-6">
               <div className="rounded-[24px] border border-[#E4D2B4] bg-white p-4 shadow-sm sm:p-5">
                 <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-                  {['customer', 'method', 'review', 'invoice'].map((label, index) => {
+                  {['customer', 'method', 'review', 'confirmed'].map((label, index) => {
                     const isActive = step === label;
-                    const doneSteps = ['method', 'review', 'invoice'];
+                    const doneSteps = ['method', 'review', 'confirmed'];
                     const isDone = doneSteps.includes(label) && doneSteps.indexOf(step) > index;
                     let className = 'bg-[#FFF9F0] text-[#8B5E3C]';
                     if (isActive) {
@@ -266,7 +182,7 @@ export function OrderModal({ open, onClose, items }: Props) {
                     }
                     return (
                       <span key={label} className={`rounded-full px-3 py-1 ${className}`}>
-                        {index + 1}. {label.charAt(0).toUpperCase() + label.slice(1)}
+                        {index + 1}. {label === 'confirmed' ? 'Order Confirmed' : label.charAt(0).toUpperCase() + label.slice(1)}
                       </span>
                     );
                   })}
@@ -352,41 +268,16 @@ export function OrderModal({ open, onClose, items }: Props) {
                   </div>
                 )}
 
-                {step === 'invoice' && invoice && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-[#6B4226]">
-                      <CheckCircle2 size={16} /> <span className="font-semibold">Bill Generated Successfully</span>
-                    </div>
-                    <SuccessDialog title="✓ Bill Uploaded Successfully" message={`Cloudinary URL: ${invoice.cloudinaryUrl ?? ''}`} />
-
-                    <div className="rounded-[24px] border border-[#E4D2B4] bg-[#FFF9F0] p-4 text-sm text-[#5A3822]">
-                      <p className="mb-2 font-semibold text-[#6B4226]">Invoice Verification</p>
-                      {invoiceVerificationContent}
-                      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                        <button
-                          type="button"
-                          onClick={handleRetryVerification}
-                          disabled={isVerifying || isUploading}
-                          className="w-full rounded-2xl border border-[#6B4226] bg-[#FFF8EF] px-4 py-3 text-sm font-semibold text-[#6B4226] transition hover:bg-[#FFF0DF] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
-                        >
-                          {isVerifying ? 'Retrying verification…' : 'Retry Verification'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleGenerateBill}
-                          disabled={isGenerating || isUploading || isVerifying}
-                          className="w-full rounded-2xl bg-[#6B4226] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B5E3C] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
-                        >
-                          {isGenerating || isUploading ? 'Regenerating invoice…' : 'Re-upload Invoice'}
-                        </button>
+                {step === 'confirmed' && invoice && (
+                  <div className="space-y-5">
+                    <div className="rounded-[24px] border border-[#E4D2B4] bg-[#FFF9F0] p-6 text-center">
+                      <div className="mb-4 flex items-center justify-center">
+                        <CheckCircle2 size={34} className="text-[#2E7D32]" />
                       </div>
+                      <h3 className="text-3xl md:text-4xl font-extrabold text-[#6B4226] leading-tight">Confirm Your Order</h3>
+                      <p className="mt-2 text-sm text-[#6D4C41]">Your bill is ready. Click “Order Now” below to confirm your order.</p>
                     </div>
-
-                    <InvoicePreview invoice={invoice} onDownload={handleDownload} />
-                    <ContinueWhatsAppButton disabled={!invoiceVerification?.verified} loading={isWhatsAppLoading} onClick={handleWhatsApp} />
-                    {!invoiceVerification?.verified && (
-                      <p className="text-sm text-[#9B2C2C]">You must verify the uploaded invoice PDF before continuing to WhatsApp.</p>
-                    )}
+                    <ContinueWhatsAppButton loading={isWhatsAppLoading} onClick={handleWhatsApp} />
                   </div>
                 )}
               </div>

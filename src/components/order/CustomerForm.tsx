@@ -63,7 +63,7 @@ export function CustomerForm({ defaultValues, onSubmit }: Props) {
       </label>
 
       <button className="w-full rounded-2xl bg-[#6B4226] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B5E3C]">
-        Continue to Delivery Location
+        Continue to Delivery Details
       </button>
     </form>
   );

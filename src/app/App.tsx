@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  Phone, MapPin, Instagram, Leaf, CheckCircle,
+  Phone, Instagram, Leaf, CheckCircle,
   Truck, Star, Shield, Heart, Package, Clock,
   ThumbsUp, Menu, X, ArrowRight, ChevronRight, ChevronLeft,
   Award, Users, ShoppingBag, Wheat, Send,
@@ -34,7 +34,6 @@ type CartItem = { product: Product; quantity: number };
 const PHONE = "8080394411";
 const PHONE_DISPLAY = "+91 8080394411";
 const INSTAGRAM_HANDLE = "@shrujay_food_products";
-const BUSINESS_MAP_URL = "https://www.google.com/maps?q=18.4956,73.9668";
 const HERO_IMAGES = ["/1000322244.jpg", "/hero-bg-1.png", "/hero-bg-2.png", "/hero-bg-3.png"];
 
 // ─── Logo image ────────────────────────────────────────────────────────────
@@ -115,18 +114,8 @@ function Nav({ page, setPage, cartCount, openCart }: { page: Page; setPage: (p: 
             ))}
           </div>
 
-          {/* Right — location + CTA */}
+          {/* Right — CTA */}
           <div className="ml-auto flex items-center justify-end gap-4">
-            <a
-              href={BUSINESS_MAP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[13px] text-[#6D4C41] font-semibold hover:text-[#DB9C23] transition-colors"
-              aria-label="Open Shrujay Food Products location in Google Maps"
-            >
-              <MapPin size={13} className="text-[#DB9C23]" />
-              Our Location
-            </a>
             <button
               onClick={() => go("products")}
               className="px-5 py-2.5 bg-[#DB9C23] text-white text-[13px] font-bold rounded-full hover:bg-[#D4A017] transition-all duration-200 shadow-sm"
@@ -181,15 +170,6 @@ function Nav({ page, setPage, cartCount, openCart }: { page: Page; setPage: (p: 
               </button>
             ))}
             <div className="px-5 pt-3 flex items-center gap-4 flex-wrap border-t border-[#DB9C23]/10 mt-2">
-              <a
-                href={BUSINESS_MAP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[13px] text-[#6D4C41]"
-                aria-label="Open Shrujay Food Products location in Google Maps"
-              >
-                <MapPin size={13} className="text-[#DB9C23]" /> Our Location
-              </a>
               <button onClick={() => go("products")} className="px-5 py-2 bg-[#DB9C23] text-white text-[13px] font-bold rounded-full">
                 Order Now
               </button>
@@ -277,10 +257,6 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
                 </div>
               </li>
               <li className="flex items-start gap-2.5">
-                <MapPin size={14} className="text-[#F6C453] mt-0.5 flex-shrink-0" />
-                <span className="text-white/80 text-[13px]">Pune, Maharashtra, India</span>
-              </li>
-              <li className="flex items-start gap-2.5">
                 <Truck size={14} className="text-[#F6C453] mt-0.5 flex-shrink-0" />
                 <span className="text-white/80 text-[13px]">Fastest home delivery available<br />Min. order 0.5 kg</span>
               </li>
@@ -346,7 +322,7 @@ function ProductCard({ product, addToCart, openCart }: { product: Product; addTo
         <p className="text-[#6D4C41] text-[13px] leading-relaxed flex-1 line-clamp-2">{product.desc}</p>
         <div className="flex flex-col gap-2 mt-3">
           <button onClick={() => addToCart(product)} className="w-full py-2 bg-[#DB9C23] text-white text-[12px] font-bold rounded-xl hover:bg-[#174C2C] transition-all duration-200 flex items-center justify-center gap-1.5">
-            <ShoppingCart size={13} /> Add to Cart
+            <ShoppingCart size={13} /> Order Now
           </button>
           <button onClick={openCart} className="w-full py-2 border-2 border-[#DB9C23] text-[#DB9C23] text-[12px] font-bold rounded-xl hover:bg-[#FFF8EC] transition-all duration-200 flex items-center justify-center gap-1.5">
             <ShoppingCart size={13} /> View Cart
@@ -576,7 +552,7 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
                           <p className="text-[#6D4C41] text-[12px] font-semibold mt-0.5">{product.marathi}</p>
                         </div>
                         <button onClick={(event) => { event.stopPropagation(); addToCart(product); }} className="mt-2 py-2 rounded-lg bg-[#DB9C23] text-white text-[12px] font-bold flex items-center justify-center gap-2 hover:bg-[#174C2C] transition-colors">
-                          <Plus size={11} /> Cart
+                          <Plus size={11} /> Order Now
                         </button>
                       </div>
                     </div>
@@ -672,7 +648,7 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
                           <p className="text-[#6D4C41] text-sm md:text-[14px] font-semibold mt-1">{product.marathi}</p>
                         </div>
                         <button onClick={(event) => { event.stopPropagation(); addToCart(product); }} className="mt-3 px-3 py-2 rounded-lg bg-[#2E7D32] text-white text-sm md:text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-[#DB9C23] transition-colors">
-                          <Plus size={12} /> Add to Cart
+                          <Plus size={12} /> Order Now
                         </button>
                       </div>
                     </div>
@@ -917,24 +893,15 @@ function HomePage({ setPage, addToCart, openCart }: { setPage: (p: Page) => void
         </div>
       </section>
 
-      {/* ── Location ── */}
       <section className="py-14 sm:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <LeafDivider className="mb-6 max-w-xs mx-auto" />
-            <SectionPill>Find Us</SectionPill>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-[#DB9C23] mb-3">Serving Pune &amp; Beyond</h2>
-            <p className="text-[#6D4C41] text-[15px]">Fresh home-made products, delivered right to your doorstep.</p>
+            <SectionPill>Order Direct</SectionPill>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-[#DB9C23] mb-3">Fresh Food, Delivered</h2>
+            <p className="text-[#6D4C41] text-[15px]">Fresh home-made products delivered right to your doorstep.</p>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-stretch">
-            <div className="lg:col-span-3 rounded-[14px] overflow-hidden shadow-md" style={{ minHeight: 320 }}>
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.0!2d73.9641990!3d18.4956049!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2eac93e1f9d47%3A0x0!2zMTjCsDI5JzQ0LjIiTiA3M8KwNTgnMDAuNCJF!5e0!3m2!1sen!2sin!4v1700000000001!5m2!1sen!2sin"
-                width="100%" height="100%" style={{ border: 0, display: "block", minHeight: 320 }}
-                allowFullScreen loading="lazy" title="Shrujay Food Products Location, Pune"
-              />
-            </div>
-            <div className="lg:col-span-2 bg-[#FFF8EC] rounded-[14px] p-5 sm:p-8 border border-[#DB9C23]/10 flex flex-col justify-center gap-5">
+          <div className="max-w-2xl mx-auto bg-[#FFF8EC] rounded-[14px] p-5 sm:p-8 border border-[#DB9C23]/10 flex flex-col justify-center gap-5">
               <div>
                 <h3 className="font-extrabold text-[#DB9C23] text-xl mb-1">Shrujay Food Products</h3>
                 <p className="text-[#6D4C41] text-[13px]">Pune, Maharashtra, India</p>
@@ -958,7 +925,6 @@ function HomePage({ setPage, addToCart, openCart }: { setPage: (p: Page) => void
               </button>
             </div>
           </div>
-        </div>
       </section>
     </div>
   );
@@ -1021,7 +987,7 @@ function ProductsPage({ setPage, addToCart, openCart }: { setPage: (p: Page) => 
 }
 
 // ─── PRODUCT DETAIL PAGE ───────────────────────────────────────────────────
-function ProductDetailPage({ setPage, addToCart }: { setPage: (p: Page) => void; addToCart: (product: Product) => void }) {
+function ProductDetailPage({ setPage, addToCart, openCart }: { setPage: (p: Page) => void; addToCart: (product: Product) => void; openCart: () => void }) {
   return (
     <div className="pt-[64px] lg:pt-[80px] min-h-screen bg-[#FFF8EC]">
       {/* Hero */}
@@ -1075,8 +1041,8 @@ function ProductDetailPage({ setPage, addToCart }: { setPage: (p: Page) => void;
                 </div>
                 <div className="flex items-center gap-3 sm:justify-end">
                   <span className="font-extrabold text-[#DB9C23] text-lg">{item.price}</span>
-                  <button onClick={() => addToCart(item)} className="px-3 py-1.5 bg-[#DB9C23] text-white text-[11px] font-bold rounded-lg hover:bg-[#174C2C] transition-colors flex items-center gap-1">
-                    <Plus size={11} /> Add
+                  <button onClick={() => { addToCart(item); openCart(); }} className="px-3 py-1.5 bg-[#DB9C23] text-white text-[11px] font-bold rounded-lg hover:bg-[#174C2C] transition-colors flex items-center gap-1">
+                    <Plus size={11} /> Order Now
                   </button>
                 </div>
               </div>
@@ -1296,21 +1262,6 @@ function ContactPage() {
       ),
     },
     {
-      icon: <MapPin size={22} />,
-      label: "Location",
-      content: (
-        <a
-          href="https://www.google.com/maps/search/?api=1&query=18.4956%2C73.9668"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block text-[#6D4C41] text-[14px] leading-relaxed font-medium hover:text-[#DB9C23] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DB9C23]/40 rounded"
-          aria-label="Open Shrujay Food Products location in Google Maps"
-        >
-          Pune, Maharashtra<br />India — 411 000 →
-        </a>
-      ),
-    },
-    {
       icon: <Truck size={22} />,
       label: "Delivery Info",
       content: (
@@ -1350,7 +1301,7 @@ function ContactPage() {
           ))}
         </div>
 
-        {/* Form + Map */}
+        {/* Enquiry form */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12">
           {/* Form */}
           <div>
@@ -1398,24 +1349,6 @@ function ContactPage() {
             )}
           </div>
 
-          {/* Map */}
-          <div>
-            <h2 className="text-2xl font-extrabold text-[#DB9C23] mb-6">Our Location</h2>
-            <div className="h-[280px] sm:h-[380px] rounded-[14px] overflow-hidden shadow-md border border-[#DB9C23]/10">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.0!2d73.9641990!3d18.4956049!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2eac93e1f9d47%3A0x0!2zMTjCsDI5JzQ0LjIiTiA3M8KwNTgnMDAuNCJF!5e0!3m2!1sen!2sin!4v1700000000002!5m2!1sen!2sin"
-                width="100%" height="100%" style={{ border: 0, display: "block" }}
-                allowFullScreen loading="lazy" title="Shrujay Food Products Location, Pune"
-              />
-            </div>
-            <div className="mt-4 bg-[#FFF8EC] rounded-xl p-4 border border-[#DB9C23]/10 flex items-start gap-3">
-              <MapPin size={16} className="text-[#DB9C23] mt-0.5 flex-shrink-0" />
-              <div>
-                <div className="font-bold text-[#DB9C23] text-[13px]">Shrujay Food Products</div>
-                <div className="text-[#6D4C41] text-[12px]">Pune, Maharashtra, India · Coordinates: 18.4956° N, 73.9668° E</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -1589,7 +1522,7 @@ export default function App() {
       <main>
         {page === "home"           && <HomePage setPage={setPage} addToCart={addToCart} openCart={() => setCartOpen(true)} />}
         {page === "products"       && <ProductsPage setPage={setPage} addToCart={addToCart} openCart={() => setCartOpen(true)} />}
-        {page === "product-detail" && <ProductDetailPage setPage={setPage} addToCart={addToCart} />}
+        {page === "product-detail" && <ProductDetailPage setPage={setPage} addToCart={addToCart} openCart={() => setCartOpen(true)} />}
         {page === "about"          && <AboutPage />}
         {page === "contact"        && <ContactPage />}
       </main>

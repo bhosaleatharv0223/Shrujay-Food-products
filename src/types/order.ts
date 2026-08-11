@@ -19,17 +19,6 @@ export type CustomerDetails = {
   state: string;
   pincode: string;
   instructions: string;
-  // Optional geolocation captured via LocationPicker or reverse-geocoding
-  latitude?: number;
-  longitude?: number;
-  googleMapsUrl?: string;
-};
-
-export type DeliveryLocation = {
-  address: string;
-  latitude: number;
-  longitude: number;
-  googleMapsUrl?: string;
 };
 
 export type DeliveryMethod = 'courier' | 'porter';
@@ -38,7 +27,7 @@ export type InvoiceData = {
   invoiceNumber: string;
   issuedAt: string;
   customer: CustomerDetails;
-  delivery: DeliveryLocation;
+  delivery: string;
   deliveryMethod: DeliveryMethod;
   items: OrderItem[];
   subtotal: number;

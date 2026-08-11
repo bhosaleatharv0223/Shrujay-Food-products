@@ -1,4 +1,4 @@
-import { Instagram, Facebook, MessageSquare, Phone, MapPin, Truck, Package, Leaf } from 'lucide-react';
+import { Instagram, Facebook, MessageSquare, Phone, Truck, Package, Leaf } from 'lucide-react';
 import type { InvoiceData } from '@/types/order';
 import { calculateLineTotal, formatCurrency } from '@/utils/pricing';
 
@@ -35,13 +35,6 @@ export function InvoiceTemplate({ data, amountInWords }: Props) {
             <div>
               <div className="text-xs uppercase tracking-[0.24em] text-[#6B4226]">Phone</div>
               <div className="font-semibold">+91 {data.customer.mobile}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 rounded-3xl border border-[#E4D2B4] bg-[#FFF7EE] p-4">
-            <MapPin size={18} className="text-[#6B4226]" />
-            <div>
-              <div className="text-xs uppercase tracking-[0.24em] text-[#6B4226]">Location</div>
-              <div className="font-semibold">Pune, Maharashtra, India</div>
             </div>
           </div>
           <div className="flex items-center gap-3 rounded-3xl border border-[#E4D2B4] bg-[#FFF7EE] p-4">
