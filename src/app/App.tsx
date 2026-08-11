@@ -696,29 +696,6 @@ function QuickShop({ setPage, addToCart, isInsideHero = false }: { setPage: (p: 
 // ─── HOME PAGE ─────────────────────────────────────────────────────────────
 function HomePage({ setPage, addToCart, openCart }: { setPage: (p: Page) => void; addToCart: (product: Product) => void; openCart: () => void }) {
   const go = (p: Page) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  // Hero CTA scroll handlers (local to HomePage)
-  function handleViewProducts() {
-    const el = document.getElementById("products");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-    go("products");
-  }
-
-  function handleContact() {
-    const contactEl = document.getElementById("contact") || document.getElementById("contact-us");
-    if (contactEl) {
-      contactEl.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-    go("contact");
-  }
-
-  // Provide handleContactUs alias to match expected handler name
-  function handleContactUs() {
-    return handleContact();
-  }
   const [heroImageIndex, setHeroImageIndex] = useState(0);
 
   useEffect(() => {
@@ -811,24 +788,8 @@ function HomePage({ setPage, addToCart, openCart }: { setPage: (p: Page) => void
             </p>
 
             <div className="flex flex-col gap-3 sm:gap-6 mb-4 sm:mb-8">
-              <div className="flex flex-col w-full gap-3 sm:flex-row sm:w-auto sm:gap-4 relative z-30">
-                <button
-                  onClick={handleViewProducts}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#F8B400] text-black font-bold uppercase tracking-wide px-6 py-3.5 rounded-full hover:bg-[#e0a300] transition-colors"
-                >
-                  View Products <ArrowRight size={14} />
-                </button>
-
-                <button
-                  onClick={handleContactUs}
-                  className="w-full sm:w-auto flex items-center justify-center border border-white/60 text-white font-semibold px-6 py-3.5 rounded-full hover:bg-white/10 transition-colors"
-                >
-                  Contact Us
-                </button>
-              </div>
-
               {/* ── Quick Shop row — full-width, same hero background ── */}
-              <div className="order-1 lg:order-2 relative w-full border-t border-white/20 pt-2 pb-4 px-0 z-10">
+              <div className="order-1 lg:order-2 relative -mt-4 sm:-mt-6 w-full border-t border-white/20 pt-2 pb-4 px-0 z-10">
                 <QuickShop setPage={setPage} addToCart={addToCart} isInsideHero={true} />
               </div>
             </div>
