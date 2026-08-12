@@ -36,5 +36,4 @@ export type InvoiceData = {
   grandTotal: number;
   orderNumber: string;
   paymentMode: string;
-  cloudinaryUrl?: string;
 };
